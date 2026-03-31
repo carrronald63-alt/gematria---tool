@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gematria Checker</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 12px 0;
+    }
+    p {
+      margin: 0 0 12px 0;
+      color: #ccc;
+    }
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 18px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+    }
+    input {
+      background: #1b1b1b;
+      color: #fff;
+    }
+    button {
+      background: #2b2b2b;
+      color: #fff;
+      cursor: pointer;
+    }
+    pre {
+      white-space: pre;
+      overflow-x: auto;
+      background: #1b1b1b;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gematria Checker</h1>
+  <p>Type a word and tap Generate.</p>
+
+  <input id="word" placeholder="Enter word..." />
+  <button onclick="run()">Generate</button>
+
+  <pre id="output">Your cipher box will appear here.</pre>
+
+  <script>
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    const CIPHERS = {
+      "Sim": [...alphabet].map((_, i) => i + 1),
+      "Rev": [...alphabet].map((_, i) => 26 - i),
+      "Eng": [...alphabet].map((_, i) => (i + 1) * 6),
+      "Jew": [
+        1, 2, 3, 4, 5, 6, 7, 8, 9,
+        600, 10, 20, 30, 40, 50, 60, 70, 80, 90,
+        100, 200, 700, 900, 300, 400, 500
+      ],
+      "RR": [...alphabet].map((_, i) => {
+        const reverse = 26 - i;
+        return ((reverse - 1) % 9) + 1;
+      }),
+      "Pyth": [...alphabet].map((_, i) => (i % 9) + 1),
+      "Chal": [
+        1, 2, 3, 4, 5, 8, 3, 5, 1,
+        1, 2, 3, 4, 5, 7, 8, 1, 2,
+        3, 4, 6, 6, 6, 5, 1, 7
+      ],
+      "Sept": [
+        1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+        1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1
+      ]
+    };
+
+    const ORDER = ["Sim", "Rev", "Eng", "Jew", "RR", "Pyth", "Chal", "Sept"];
+
+    function clean(word) {
+      return word.toLowerCase().replace(/[^a-z]/g, "");
+    }
+
+    function run() {
+      const raw = document.getElementById("word").value;
+      const word = clean(raw);
+      const output = document.getElementById("output");
+
+      if (!word) {
+        output.textContent = "Enter a real word.";
+        return;
+      }
+
+      const rows = ORDER.map(name => {
+        const vals = [...word].map(ch => {
+          const i = alphabet.indexOf(ch);
+          return CIPHERS[name][i];
+        });
+        const total = vals.reduce((a, b) => a + b, 0);
+        return [name, vals, total];
+      });
+
+      const labelWidth = 5;
+      const colWidth = Math.max(
+        2,
+        ...rows.flatMap(r => r[1].map(v => String(v).length)),
+        ...[...word].map(ch => (ch.toUpperCase() + ".").length)
+      ) + 1;
+
+      const header =
+        " ".repeat(labelWidth + 1) +
+        [...word].map(ch => (ch.toUpperCase() + ".").padStart(colWidth)).join("");
+
+      let out = word.toUpperCase() + "\n\n";
+      out += header + "\n\n";
+
+      rows.forEach(([name, vals, total]) => {
+        const seq = vals.map(v => String(v).padStart(colWidth)).join("");
+        out += name.padEnd(labelWidth) + " " + seq + " = " + total + "\n";
+      });
+
+      output.textContent = out;
+    }
+
+    document.getElementById("word").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") run();
+    });
+  </script>
+</body>
+</html>
