@@ -1,84 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amber’s Word Journal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amber’s Word Journal</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: monospace;
+      overflow-x: hidden;
+    }
 
-<style>
-body {
-  margin: 0;
-  background: black;
-  color: white;
-  font-family: monospace;
-}
+    #matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
 
-#matrix {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
 
-.container {
-  position: relative;
-  z-index: 1;
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-}
+    h1 {
+      color: #00ffcc;
+      text-align: center;
+      letter-spacing: 2px;
+    }
 
-h1 {
-  color: #00ffcc;
-  text-align: center;
-  letter-spacing: 2px;
-}
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-.controls {
-  text-align: center;
-  margin-bottom: 20px;
-}
+    input {
+      padding: 10px;
+      font-size: 18px;
+      width: 250px;
+      background: #111;
+      color: white;
+      border: 1px solid #00ffcc;
+    }
 
-input {
-  padding: 10px;
-  font-size: 18px;
-  width: 250px;
-  background: #111;
-  color: white;
-  border: 1px solid #00ffcc;
-}
+    button {
+      padding: 10px 15px;
+      font-size: 18px;
+      background: #00ffcc;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
 
-button {
-  padding: 10px 15px;
-  font-size: 18px;
-  background: #00ffcc;
-  border: none;
-  cursor: pointer;
-  margin-left: 10px;
-}
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+    }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  margin: 6px 0;
-}
+    .label {
+      width: 140px;
+      color: #9fffe9;
+    }
 
-.label {
-  width: 140px;
-  color: #9fffe9;
-}
+    .sequence {
+      flex: 1;
+    }
 
-.sequence {
-  flex: 1;
-}
-
-.total {
-  width: 80px;
-  text-align: right;
-  color: #00ffcc;
-  font-weight: bold;
-}
-</style>
+    .total {
+      width: 80px;
+      text-align: right;
+      color: #00ffcc;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
