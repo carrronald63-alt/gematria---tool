@@ -3,316 +3,631 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amber’s Word Journal 🦋</title>
+  <title>Ambers Word Journal — Gematria Tool</title>
   <style>
+    :root {
+      --bg: #05090d;
+      --panel: rgba(10, 16, 22, 0.90);
+      --panel-2: rgba(16, 24, 34, 0.94);
+      --line: rgba(110, 190, 140, 0.16);
+      --line-strong: rgba(110, 220, 150, 0.28);
+      --text: #ecfff1;
+      --muted: #9ec7aa;
+      --accent: #72ff9f;
+      --accent-soft: rgba(114, 255, 159, 0.12);
+      --seq-bg: rgba(22, 38, 28, 0.78);
+      --seq-border: rgba(106, 255, 150, 0.22);
+      --total-bg: rgba(49, 33, 10, 0.92);
+      --total-border: rgba(255, 205, 94, 0.30);
+      --total-text: #ffd978;
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+    }
+
     * {
       box-sizing: border-box;
     }
 
-    :root {
-      --bg: #000;
-      --panel: rgba(0, 0, 0, 0.60);
-      --line: rgba(0, 255, 180, 0.18);
-      --line-soft: rgba(0, 255, 180, 0.10);
-      --text: #eafff8;
-      --accent: #86ffe0;
-      --total: #ffd54a;
-    }
-
-    body {
+    html, body {
       margin: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-family: monospace;
       overflow-x: hidden;
     }
 
-    #matrix {
+    #matrixCanvas {
       position: fixed;
       inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
-      display: block;
+      opacity: 0.42;
+      pointer-events: none;
     }
 
-    .app {
-      position: relative;
+    .bg-glow {
+      position: fixed;
+      inset: 0;
       z-index: 1;
-      max-width: 1200px;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top center, rgba(82, 255, 149, 0.08), transparent 30%),
+        radial-gradient(circle at 20% 30%, rgba(82, 255, 149, 0.05), transparent 20%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0,0,0,0.28));
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px 18px 40px;
-      text-align: center;
-      background: rgba(0, 0, 0, 0.48);
+      padding: 20px;
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 22px 20px 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      margin-bottom: 18px;
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: 2.1rem;
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(0, 255, 170, 0.35);
+      margin: 0 0 6px;
+      font-size: clamp(1.7rem, 3vw, 2.8rem);
+      line-height: 1.1;
+      letter-spacing: 0.02em;
     }
 
-    p {
-      margin: 0 0 18px;
-      color: #caffef;
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
     }
 
     .controls {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      margin-top: 18px;
     }
 
-    input {
-      padding: 12px;
-      font-size: 16px;
-      min-width: 260px;
-      border: 1px solid #00ccb0;
-      background: #05110f;
+    input[type="text"] {
+      width: 100%;
+      background: rgba(6, 14, 10, 0.84);
       color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 1rem;
       outline: none;
-      font-family: monospace;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(114, 255, 159, 0.12);
     }
 
     button {
-      padding: 12px 18px;
-      font-size: 16px;
-      cursor: pointer;
-      border: 1px solid #00ccb0;
-      background: #0b1a17;
+      border: 1px solid var(--line);
+      background: rgba(14, 27, 20, 0.95);
       color: var(--text);
-      font-family: monospace;
+      border-radius: 14px;
+      padding: 0 18px;
+      font-size: 0.98rem;
+      cursor: pointer;
+      min-height: 50px;
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
 
     button:hover {
-      background: #12302a;
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: rgba(22, 42, 31, 1);
     }
 
-    .table {
-      width: 100%;
-      max-width: 1080px;
-      margin: 0 auto;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      padding: 8px 10px 12px;
-    }
-
-    .row {
+    .grid {
       display: grid;
-      grid-template-columns: 170px 1fr 80px;
-      align-items: center;
-      gap: 14px;
-      min-height: 56px;
-      padding: 6px 4px;
-      border-bottom: 1px solid var(--line-soft);
+      grid-template-columns: 1.15fr 1fr;
+      gap: 18px;
     }
 
-    .row:last-child {
-      border-bottom: none;
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
     }
 
-    .name {
-      color: var(--accent);
-      text-align: left;
-      white-space: nowrap;
-      font-size: 1.05rem;
-      padding-left: 4px;
-    }
-
-    .values {
+    .card-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
       display: flex;
-      flex-wrap: nowrap;
-      gap: 8px;
+      justify-content: space-between;
       align-items: center;
-      overflow-x: auto;
-      padding: 6px 0;
-      scrollbar-width: thin;
+      gap: 12px;
     }
 
-    .value-box {
-      min-width: 42px;
+    .card-head h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+    }
+
+    .tiny {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .results-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 14px;
+    }
+
+    .results-board {
+      min-width: 780px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: 168px minmax(390px, 1fr) 94px;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .cipher-name,
+    .sequence-box,
+    .total-box {
+      border-radius: 14px;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+    }
+
+    .cipher-name {
+      padding: 0 14px;
+      background: rgba(9, 20, 15, 0.96);
+      border: 1px solid var(--line);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .sequence-box {
+      background: var(--seq-bg);
+      border: 1px solid var(--seq-border);
+      padding: 8px 12px;
+      overflow-x: auto;
+      justify-content: flex-end;
+    }
+
+    .sequence {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      width: 100%;
+      min-width: max-content;
+    }
+
+    .num {
+      min-width: 36px;
       height: 36px;
       padding: 0 8px;
+      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(0, 255, 180, 0.14);
-      background: rgba(0, 0, 0, 0.22);
-      color: var(--text);
+      background: rgba(114, 255, 159, 0.08);
+      border: 1px solid rgba(114, 255, 159, 0.14);
+      font-weight: 700;
+      font-size: 0.96rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .gap {
+      min-width: 14px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .total-box {
+      justify-content: center;
+      background: var(--total-bg);
+      border: 1px solid var(--total-border);
+      color: var(--total-text);
+      font-weight: 800;
       font-size: 1.08rem;
-      line-height: 1;
-      flex: 0 0 auto;
+      letter-spacing: 0.02em;
     }
 
-    .total {
-      color: var(--total);
-      font-weight: bold;
-      text-align: right;
-      white-space: nowrap;
-      font-size: 1.15rem;
-      padding-right: 6px;
+    .alpha-wrap {
+      padding: 14px;
+      display: grid;
+      gap: 14px;
+      max-height: 78vh;
+      overflow: auto;
     }
 
-    @media (max-width: 860px) {
-      .row {
-        grid-template-columns: 130px 1fr 62px;
-        gap: 8px;
+    .alpha-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(10, 18, 14, 0.94);
+    }
+
+    .alpha-title {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: rgba(17, 31, 24, 0.96);
+    }
+
+    .alpha-grid {
+      display: grid;
+      grid-template-columns: repeat(13, minmax(44px, 1fr));
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .alpha-cell {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      min-height: 54px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(7, 15, 11, 0.88);
+    }
+
+    .letter {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .val {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
       }
 
-      .name {
-        font-size: 0.95rem;
+      .alpha-wrap {
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .controls {
+        grid-template-columns: 1fr;
       }
 
-      .value-box {
-        min-width: 36px;
-        height: 32px;
-        font-size: 0.95rem;
+      .result-row {
+        grid-template-columns: 145px minmax(300px, 1fr) 82px;
       }
 
-      .total {
-        font-size: 1rem;
+      .results-board {
+        min-width: 650px;
+      }
+
+      .alpha-grid {
+        grid-template-columns: repeat(6, minmax(44px, 1fr));
       }
     }
   </style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="bg-glow"></div>
 
-  <div class="app">
-    <h1>Amber’s Word Journal 🦋</h1>
-    <p>Type a word and tap Generate</p>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Ambers Word Journal</h1>
+      <p class="sub">Type a word or phrase and tap Generate.</p>
 
-    <div class="controls">
-      <input id="word" placeholder="Enter word" />
-      <button onclick="calculate()">Generate</button>
+      <div class="controls">
+        <input
+          id="wordInput"
+          type="text"
+          placeholder="Enter a word or phrase"
+          autocomplete="off"
+        />
+        <button id="generateBtn">Generate</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card-head">
+          <h2>Cipher Sequences</h2>
+          <div class="tiny">totals on right</div>
+        </div>
+
+        <div class="results-scroll">
+          <div id="resultsBoard" class="results-board"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Cipher Box</h2>
+          <div class="tiny">letter values</div>
+        </div>
+        <div id="alphaWrap" class="alpha-wrap"></div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      Simφle • Reverse • English • Jwsh • Rev. Reduced • Φythagorean • Chaldean • Seφtenary
     </div>
-
-    <div id="output" class="table"></div>
   </div>
 
   <script>
-    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+    const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
-    function cleanWord(word) {
-      return word.toLowerCase().replace(/[^a-z]/g, "");
+    const ciphers = [
+      {
+        name: "Simφle",
+        map: (() => {
+          const m = {};
+          alphabet.forEach((ch, i) => m[ch] = i + 1);
+          return m;
+        })()
+      },
+      {
+        name: "Reverse",
+        map: (() => {
+          const m = {};
+          alphabet.forEach((ch, i) => m[ch] = 26 - i);
+          return m;
+        })()
+      },
+      {
+        name: "English",
+        map: (() => {
+          const m = {};
+          alphabet.forEach((ch, i) => m[ch] = (i + 1) * 6);
+          return m;
+        })()
+      },
+      {
+        name: "Jwsh",
+        map: {
+          a: 1,   b: 2,   c: 3,   d: 4,   e: 5,   f: 6,   g: 7,   h: 8,   i: 9,
+          j: 600, k: 10,  l: 20,  m: 30,  n: 40,  o: 50,  p: 60,  q: 70,  r: 80,
+          s: 90,  t: 100, u: 200, v: 700, w: 900, x: 300, y: 400, z: 500
+        }
+      },
+      {
+        name: "Rev. Reduced",
+        map: (() => {
+          const m = {};
+          alphabet.forEach((ch, i) => {
+            const reverseValue = 26 - i;
+            m[ch] = ((reverseValue - 1) % 9) + 1;
+          });
+          return m;
+        })()
+      },
+      {
+        name: "Φythagorean",
+        map: (() => {
+          const m = {};
+          alphabet.forEach((ch, i) => m[ch] = (i % 9) + 1);
+          return m;
+        })()
+      },
+      {
+        name: "Chaldean",
+        map: {
+          a: 1, b: 2, c: 3, d: 4, e: 5, f: 8, g: 3, h: 5, i: 1,
+          j: 1, k: 2, l: 3, m: 4, n: 5, o: 7, p: 8, q: 1, r: 2,
+          s: 3, t: 4, u: 6, v: 6, w: 6, x: 5, y: 1, z: 7
+        }
+      },
+      {
+        name: "Seφtenary",
+        map: {
+          a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 6, i: 5,
+          j: 4, k: 3, l: 2, m: 1, n: 1, o: 2, p: 3, q: 4, r: 5,
+          s: 6, t: 7, u: 6, v: 5, w: 4, x: 3, y: 2, z: 1
+        }
+      }
+    ];
+
+    const wordInput = document.getElementById("wordInput");
+    const generateBtn = document.getElementById("generateBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const resultsBoard = document.getElementById("resultsBoard");
+    const alphaWrap = document.getElementById("alphaWrap");
+
+    function cleanText(text) {
+      return (text || "").toLowerCase();
     }
 
-    function simple(word) {
-      return [...word].map(c => alphabet.indexOf(c) + 1);
+    function getSequence(text, map) {
+      const chars = cleanText(text).split("");
+      const seq = [];
+
+      chars.forEach((ch) => {
+        if (map[ch] !== undefined) {
+          seq.push({ type: "num", value: map[ch] });
+        } else if (ch === " ") {
+          seq.push({ type: "gap", value: "" });
+        }
+      });
+
+      return seq;
     }
 
-    function reverse(word) {
-      return [...word].map(c => 26 - alphabet.indexOf(c));
+    function getTotal(sequence) {
+      return sequence.reduce((sum, item) => {
+        if (item.type === "num") return sum + item.value;
+        return sum;
+      }, 0);
     }
 
-    function english(word) {
-      return simple(word).map(n => n * 6);
-    }
+    function renderResults(text) {
+      resultsBoard.innerHTML = "";
 
-    function reverseReduced(word) {
-      return reverse(word).map(n => n % 9 || 9);
-    }
+      ciphers.forEach((cipher) => {
+        const seq = getSequence(text, cipher.map);
+        const total = getTotal(seq);
 
-    function pythagorean(word) {
-      return simple(word).map(n => n % 9 || 9);
-    }
+        const row = document.createElement("div");
+        row.className = "result-row";
 
-    const chaldeanMap = {
-      a:1,b:2,c:3,d:4,e:5,f:8,g:3,h:5,i:1,j:1,k:2,l:3,m:4,
-      n:5,o:7,p:8,q:1,r:2,s:3,t:4,u:6,v:6,w:6,x:5,y:1,z:7
-    };
+        const name = document.createElement("div");
+        name.className = "cipher-name";
+        name.textContent = cipher.name;
 
-    function chaldean(word) {
-      return [...word].map(c => chaldeanMap[c] || 0);
-    }
+        const seqBox = document.createElement("div");
+        seqBox.className = "sequence-box";
 
-    const septenaryMap = {
-      a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:6,i:5,j:4,k:3,l:2,m:1,
-      n:1,o:2,p:3,q:4,r:5,s:6,t:7,u:6,v:5,w:4,x:3,y:2,z:1
-    };
+        const seqInner = document.createElement("div");
+        seqInner.className = "sequence";
 
-    function septenary(word) {
-      return [...word].map(c => septenaryMap[c] || 0);
-    }
+        if (seq.length === 0) {
+          const empty = document.createElement("span");
+          empty.style.color = "var(--muted)";
+          empty.textContent = "—";
+          seqInner.appendChild(empty);
+        } else {
+          seq.forEach((item) => {
+            const el = document.createElement("span");
+            el.className = item.type === "num" ? "num" : "gap";
+            el.textContent = item.type === "num" ? item.value : "";
+            seqInner.appendChild(el);
+          });
+        }
 
-    function jewish(word) {
-      return [...word].map(c => {
-        const n = alphabet.indexOf(c) + 1;
-        if (n <= 9) return n;
-        if (n <= 18) return (n - 9) * 10;
-        return (n - 18) * 100;
+        seqBox.appendChild(seqInner);
+
+        const totalBox = document.createElement("div");
+        totalBox.className = "total-box";
+        totalBox.textContent = total;
+
+        row.appendChild(name);
+        row.appendChild(seqBox);
+        row.appendChild(totalBox);
+        resultsBoard.appendChild(row);
       });
     }
 
-    function sum(arr) {
-      return arr.reduce((a, b) => a + b, 0);
+    function renderCipherBoxes() {
+      alphaWrap.innerHTML = "";
+
+      ciphers.forEach((cipher) => {
+        const card = document.createElement("div");
+        card.className = "alpha-card";
+
+        const title = document.createElement("div");
+        title.className = "alpha-title";
+        title.textContent = cipher.name;
+
+        const grid = document.createElement("div");
+        grid.className = "alpha-grid";
+
+        alphabet.forEach((letter) => {
+          const cell = document.createElement("div");
+          cell.className = "alpha-cell";
+
+          const l = document.createElement("div");
+          l.className = "letter";
+          l.textContent = letter;
+
+          const v = document.createElement("div");
+          v.className = "val";
+          v.textContent = cipher.map[letter];
+
+          cell.appendChild(l);
+          cell.appendChild(v);
+          grid.appendChild(cell);
+        });
+
+        card.appendChild(title);
+        card.appendChild(grid);
+        alphaWrap.appendChild(card);
+      });
     }
 
-    function renderValueBoxes(values) {
-      return values.map(v => `<span class="value-box">${v}</span>`).join("");
+    function generate() {
+      renderResults(wordInput.value.trim());
     }
 
-    function makeRow(name, values) {
-      return `
-        <div class="row">
-          <div class="name">${name}</div>
-          <div class="values">${renderValueBoxes(values)}</div>
-          <div class="total">${sum(values)}</div>
-        </div>
-      `;
-    }
+    generateBtn.addEventListener("click", generate);
 
-    function calculate() {
-      const word = cleanWord(document.getElementById("word").value);
-
-      if (!word) {
-        document.getElementById("output").innerHTML = "";
-        return;
-      }
-
-      let html = "";
-      html += makeRow("Simφle", simple(word));
-      html += makeRow("Reverse", reverse(word));
-      html += makeRow("English", english(word));
-      html += makeRow("Jewish", jewish(word));
-      html += makeRow("Rev. Reduced", reverseReduced(word));
-      html += makeRow("Pythagorean", pythagorean(word));
-      html += makeRow("Chaldean", chaldean(word));
-      html += makeRow("Septenary", septenary(word));
-
-      document.getElementById("output").innerHTML = html;
-    }
-
-    document.getElementById("word").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") calculate();
+    clearBtn.addEventListener("click", () => {
+      wordInput.value = "";
+      renderResults("");
+      wordInput.focus();
     });
 
-    const canvas = document.getElementById("matrix");
+    wordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") generate();
+    });
+
+    renderCipherBoxes();
+    renderResults("");
+
+    /* MATRIX RAIN */
+    const canvas = document.getElementById("matrixCanvas");
     const ctx = canvas.getContext("2d");
 
-    let width, height, columns, drops;
-    const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let width = 0;
+    let height = 0;
+    let fontSize = 18;
+    let columns = 0;
+    let drops = [];
+    const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$+-*/=%<>λφ";
 
-    function resizeMatrix() {
+    function setupMatrix() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      columns = Math.floor(width / 20);
+      columns = Math.floor(width / fontSize);
       drops = Array(columns).fill(1);
     }
 
     function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillStyle = "rgba(5, 9, 13, 0.08)";
       ctx.fillRect(0, 0, width, height);
 
-      ctx.fillStyle = "#00ff66";
-      ctx.font = "16px monospace";
+      ctx.fillStyle = "#72ff9f";
+      ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
         const text = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(text, i * 20, drops[i] * 20);
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
 
-        if (drops[i] * 20 > height && Math.random() > 0.975) {
+        ctx.fillText(text, x, y);
+
+        if (y > height && Math.random() > 0.975) {
           drops[i] = 0;
         }
 
@@ -320,9 +635,9 @@
       }
     }
 
-    resizeMatrix();
-    window.addEventListener("resize", resizeMatrix);
+    setupMatrix();
     setInterval(drawMatrix, 50);
+    window.addEventListener("resize", setupMatrix);
   </script>
 </body>
 </html>
