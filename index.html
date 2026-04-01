@@ -1,145 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gematria Checker</title>
-  <style>
-    body {
-      font-family: monospace;
-      background: #111;
-      color: #eee;
-      margin: 0;
-      padding: 16px;
-    }
-    h1 {
-      font-size: 20px;
-      margin: 0 0 12px 0;
-    }
-    p {
-      margin: 0 0 12px 0;
-      color: #ccc;
-    }
-    input, button {
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 18px;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #444;
-    }
-    input {
-      background: #1b1b1b;
-      color: #fff;
-    }
-    button {
-      background: #2b2b2b;
-      color: #fff;
-      cursor: pointer;
-    }
-    pre {
-      white-space: pre;
-      overflow-x: auto;
-      background: #1b1b1b;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      font-size: 15px;
-      line-height: 1.5;
-    }
-  </style>
+<title>Amber’s Word Journal</title>
 </head>
-<body>
-  
-  <h1>Amber’s Word Journal 🦋</h1>  
-  <p>Gematria Checker</p>
-  <p>Type a word and tap Generate.</p>
 
-  <input id="word" placeholder="Enter word..." />
-  <button onclick="run()">Generate</button>
+<body style="background:black;color:white;font-family:monospace;">
 
-  <pre id="output">Your cipher box will appear here.</pre>
+<h1 style="letter-spacing:2px;color:#00ffcc;">
+Amber’s Word Journal 🦋
+</h1>
 
-  <script>
-    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+<p>enter a word and reveal the numbers</p>
 
-    const CIPHERS = {
-      "Sim": [...alphabet].map((_, i) => i + 1),
-      "Rev": [...alphabet].map((_, i) => 26 - i),
-      "Eng": [...alphabet].map((_, i) => (i + 1) * 6),
-      "Jwsh": [
-        1, 2, 3, 4, 5, 6, 7, 8, 9,
-        600, 10, 20, 30, 40, 50, 60, 70, 80, 90,
-        100, 200, 700, 900, 300, 400, 500
-      ],
-      "RR": [...alphabet].map((_, i) => {
-        const reverse = 26 - i;
-        return ((reverse - 1) % 9) + 1;
-      }),
-      "Pyth": [...alphabet].map((_, i) => (i % 9) + 1),
-      "Chal": [
-        1, 2, 3, 4, 5, 8, 3, 5, 1,
-        1, 2, 3, 4, 5, 7, 8, 1, 2,
-        3, 4, 6, 6, 6, 5, 1, 7
-      ],
-      "Sept": [
-        1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
-        1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1
-      ]
-    };
+<input id="word" placeholder="word">
+<button onclick="generate()">Generate</button>
 
-    const ORDER = ["Sim", "Rev", "Eng", "Jwsh", "RR", "Pyth", "Chal", "Sept"];
+<div id="output"></div>
 
-    function clean(word) {
-      return word.toLowerCase().replace(/[^a-z]/g, "");
-    }
+<script>
 
-    function run() {
-      const raw = document.getElementById("word").value;
-      const word = clean(raw);
-      const output = document.getElementById("output");
+const ciphers = [
+  {name:"Simple",values:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]},
+  {name:"Reverse",values:[26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]},
+  {name:"English",values:[6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120,126,132,138,144,150,156]},
+  {name:"Reverse Reduced",values:[8,7,6,5,4,3,2,1,9,8,7,6,5,4,3,2,1,9,8,7,6,5,4,3,2,1]},
+  {name:"Pythagorean",values:[1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8]},
+  {name:"Chaldean",values:[1,2,3,4,5,8,3,5,1,1,2,3,4,5,7,8,1,2,3,4,6,6,6,5,1,7]},
+  {name:"Septenary",values:[1,2,3,4,5,6,7,1,2,3,4,5,6,7,1,2,3,4,5,6,7,1,2,3,4,5]}
+];
 
-      if (!word) {
-        output.textContent = "Enter a real word.";
-        return;
+function generate() {
+  let word = document.getElementById("word").value.toLowerCase();
+  let output = document.getElementById("output");
+  output.innerHTML = "";
+
+  for (let c = 0; c < ciphers.length; c++) {
+
+    let total = 0;
+    let seq = "";
+
+    for (let i = 0; i < word.length; i++) {
+      let index = word.charCodeAt(i) - 97;
+
+      if (index >= 0 && index < 26) {
+        let val = ciphers[c].values[index];
+        total += val;
+        seq += val + " ";
       }
-
-      const rows = ORDER.map(name => {
-        const vals = [...word].map(ch => {
-          const i = alphabet.indexOf(ch);
-          return CIPHERS[name][i];
-        });
-        const total = vals.reduce((a, b) => a + b, 0);
-        return [name, vals, total];
-      });
-
-      const labelWidth = 5;
-      const colWidth = Math.max(
-        2,
-        ...rows.flatMap(r => r[1].map(v => String(v).length)),
-        ...[...word].map(ch => (ch.toUpperCase() + ".").length)
-      ) + 1;
-
-      const header =
-        " ".repeat(labelWidth + 1) +
-        [...word].map(ch => (ch.toUpperCase() + ".").padStart(colWidth)).join("");
-
-      let out = word.toUpperCase() + "\n\n";
-      out += header + "\n\n";
-
-      rows.forEach(([name, vals, total]) => {
-        const seq = vals.map(v => String(v).padStart(colWidth)).join("");
-        out += name.padEnd(labelWidth) + " " + seq + " = " + total + "\n";
-      });
-
-      output.textContent = out;
     }
 
-    document.getElementById("word").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") run();
-    });
-  </script>
+    let line = document.createElement("div");
+
+    line.innerHTML =
+      "<span style='color:#00ffcc;width:60px;display:inline-block;text-align:right;margin-right:10px;'>"
+      + total +
+      "</span>" +
+      "<span>" + seq + "</span>";
+
+    output.appendChild(line);
+  }
+}
+
+</script>
 
 </body>
 </html>
