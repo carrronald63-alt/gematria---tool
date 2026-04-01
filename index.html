@@ -52,11 +52,12 @@ function generate() {
     let line = document.createElement("div");
 
     line.innerHTML =
-      "<span style='color:#00ffcc;width:60px;display:inline-block;text-align:right;margin-right:10px;'>"
-      + total +
-      "</span>" +
-      "<span>" + seq + "</span>";
-
+  "<span style='display:inline-block;min-width:300px;text-align:left;'>"
+  + seq +
+  "</span>" +
+  "<span style='color:#00ffcc;width:80px;display:inline-block;text-align:left;margin-left:20px;'>"
+  + total +
+  "</span>";
     output.appendChild(line);
   }
 }
