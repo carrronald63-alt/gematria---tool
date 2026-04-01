@@ -1,259 +1,443 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Amber's Word Journal</title>
 
 <style>
-body {
-  margin: 0;
-  background: #020506;
-  color: #ecfff5;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
+:root{
+  --bg:#020506;
+  --panel:rgba(0,0,0,0.62);
+  --line:rgba(0,255,150,0.18);
+  --soft:rgba(255,255,255,0.05);
+  --soft2:rgba(255,255,255,0.035);
+  --green:#00ff9c;
+  --text:#ecfff5;
+  --muted:#9cc7af;
+  --total-bg:rgba(0,255,150,0.18);
+  --pulse: rgba(0,255,150,0.3);
 }
 
-#matrix {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial, sans-serif;
+  overflow-x:hidden;
 }
 
-.app {
-  position: relative;
-  z-index: 2;
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 18px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(0,255,150,0.2);
-  border-radius: 16px;
+#matrix{
+  position:fixed;
+  inset:0;
+  z-index:0;
 }
 
-h1 {
-  text-align: center;
-  color: #00ff9c;
-  margin: 0;
+.app{
+  position:relative;
+  z-index:2;
+  max-width:920px;
+  margin:20px auto;
+  padding:18px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  backdrop-filter:blur(2px);
 }
 
-.sub {
-  text-align: center;
-  color: #9cc7af;
-  margin-bottom: 14px;
+h1{
+  margin:0;
+  text-align:center;
+  color:var(--green);
+  font-size:clamp(26px,4vw,36px);
+  line-height:1.1;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
+.sub{
+  margin:8px 0 14px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
 }
 
-input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,255,150,0.3);
-  background: #000;
-  color: #fff;
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
 
-button {
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,255,150,0.3);
-  background: rgba(0,255,150,0.1);
-  color: #00ff9c;
-  font-weight: bold;
-  cursor: pointer;
+input{
+  flex:1;
+  min-width:0;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid rgba(0,255,150,0.28);
+  background:#000;
+  color:#fff;
+  outline:none;
+  font-size:16px;
 }
 
-.results {
-  display: none;
-  margin-top: 12px;
+input::placeholder{
+  color:#8bb7a0;
 }
 
-.results.show {
-  display: block;
+button{
+  padding:12px 16px;
+  border-radius:10px;
+  border:1px solid rgba(0,255,150,0.30);
+  background:rgba(0,255,150,0.10);
+  color:var(--green);
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
 }
 
-.row {
-  margin-bottom: 6px;
-  padding: 6px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
+.results{
+  display:none;
+  margin-top:14px;
 }
 
-.strip {
-  overflow-x: auto;
+.results.show{
+  display:block;
 }
 
-.line {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
+.row{
+  margin-bottom:8px;
+  padding:8px;
+  border-radius:12px;
+  background:var(--soft2);
+  border:1px solid rgba(255,255,255,0.03);
 }
 
-.name {
-  padding: 4px 6px;
-  background: rgba(0,255,150,0.1);
-  border-radius: 6px;
-  font-size: 12px;
-  color: #00ff9c;
+.row-inner{
+  display:grid;
+  grid-template-columns:96px 1fr 64px;
+  align-items:center;
+  gap:8px;
 }
 
-.box {
-  min-width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
+.name{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  height:40px;
+  padding:0 8px;
+  border-radius:8px;
+  background:rgba(0,255,150,0.10);
+  color:var(--green);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.2px;
+  overflow:hidden;
+  white-space:nowrap;
 }
 
-.total {
-  background: rgba(0,255,150,0.2);
+.seq-wrap{
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
 }
 
-.matrix {
-  display: none;
-  margin-top: 12px;
-  padding: 10px;
-  border: 1px solid rgba(0,255,150,0.2);
-  border-radius: 12px;
+.seq{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:48px;
+  gap:6px;
+  width:max-content;
 }
 
-.matrix.show {
-  display: block;
+.box,
+.total{
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:9px;
+  font-size:15px;
+  font-variant-numeric:tabular-nums;
+  line-height:1;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 8px;
+.box{
+  background:var(--soft);
+  color:var(--text);
 }
 
-.card {
-  text-align: center;
-  padding: 8px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
+.total{
+  width:64px;
+  background:var(--total-bg);
+  color:#dffff0;
+  font-weight:700;
+  justify-self:end;
 }
 
-.card span {
-  display: block;
+.matrix-box{
+  display:none;
+  margin-top:14px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(0,0,0,0.22);
+}
+
+.matrix-box.show{
+  display:block;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+
+.card{
+  text-align:center;
+  padding:10px 8px;
+  border-radius:10px;
+  background:var(--soft);
+  min-width:0;
+}
+
+.card-name{
+  display:block;
+  color:#d6fff0;
+  font-size:13px;
+  margin-bottom:6px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.card-total{
+  display:block;
+  color:var(--green);
+  font-size:18px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+
+@media (max-width:700px){
+  .app{
+    margin:10px;
+    padding:14px;
+  }
+
+  .controls{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  button{
+    width:100%;
+  }
+
+  .row-inner{
+    grid-template-columns:78px 1fr 58px;
+    gap:6px;
+  }
+
+  .name{
+    font-size:11px;
+    padding:0 6px;
+  }
+
+  .seq{
+    grid-auto-columns:42px;
+    gap:5px;
+  }
+
+  .box,
+  .total{
+    height:36px;
+    font-size:14px;
+  }
+
+  .total{
+    width:58px;
+  }
+
+  .grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  .card-name{
+    font-size:12px;
+  }
+
+  .card-total{
+    font-size:16px;
+  }
 }
 </style>
 </head>
-
 <body>
 
 <canvas id="matrix"></canvas>
 
 <div class="app">
-<h1>Amber's Word Journal</h1>
-<p class="sub">Type a word and tap Generate</p>
+  <h1>Amber's Word Journal</h1>
+  <p class="sub">Type a word and tap Generate</p>
 
-<div class="controls">
-<input id="word" placeholder="Enter word">
-<button onclick="run()">Generate</button>
-</div>
+  <div class="controls">
+    <input id="word" type="text" placeholder="Enter word" />
+    <button onclick="run()">Generate</button>
+  </div>
 
-<div id="results" class="results"></div>
+  <div id="results" class="results"></div>
 
-<div id="matrixBox" class="matrix">
-<div class="grid" id="grid"></div>
-</div>
+  <div id="matrixBox" class="matrix-box">
+    <div id="grid" class="grid"></div>
+  </div>
 </div>
 
 <script>
-const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-function mapSimple(){let m={};for(let i=0;i<26;i++)m[A[i]]=i+1;return m;}
-function mapReverse(){let m={};for(let i=0;i<26;i++)m[A[i]]=26-i;return m;}
-function mapEnglish(){let m={};for(let i=0;i<26;i++)m[A[i]]=(i+1)*6;return m;}
-function mapReduced(){let m={};for(let i=0;i<26;i++)m[A[i]]=((i)%9)+1;return m;}
-function mapRevReduced(){let m={};for(let i=0;i<26;i++){let r=26-i;m[A[i]]=((r-1)%9)+1;}return m;}
+function mapSimple(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = i + 1;
+  return m;
+}
 
-const jewish=[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800];
-function mapJewish(){let m={};for(let i=0;i<26;i++)m[A[i]]=jewish[i];return m;}
+function mapReverse(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = 26 - i;
+  return m;
+}
 
-const chald={A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7};
+function mapEnglish(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = (i + 1) * 6;
+  return m;
+}
 
-const sept=[1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
-function mapSept(){let m={};for(let i=0;i<26;i++)m[A[i]]=sept[i];return m;}
+function mapReduced(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = (i % 9) + 1;
+  return m;
+}
 
-const ciphers=[
-["Simpφle",mapSimple()],
-["Reverse",mapReverse()],
-["English",mapEnglish()],
-["Jwsh",mapJewish()],
-["Rev Red",mapRevReduced()],
-["Pythφ",mapReduced()],
-["Chaldean",chald],
-["Seφt",mapSept()]
+function mapRevReduced(){
+  const m = {};
+  for(let i = 0; i < 26; i++){
+    const r = 26 - i;
+    m[A[i]] = ((r - 1) % 9) + 1;
+  }
+  return m;
+}
+
+const jewish = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800];
+function mapJwsh(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = jewish[i];
+  return m;
+}
+
+const chald = {
+  A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
+  N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
+};
+
+const sept = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
+function mapSept(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = sept[i];
+  return m;
+}
+
+const ciphers = [
+  ["simφ", mapSimple()],
+  ["rev", mapReverse()],
+  ["eng", mapEnglish()],
+  ["jwsh", mapJwsh()],
+  ["r.r.", mapRevReduced()],
+  ["φyth", mapReduced()],
+  ["chdn", chald],
+  ["seφt", mapSept()]
 ];
 
-function clean(t){return t.toUpperCase().replace(/[^A-Z]/g,"");}
+function clean(t){
+  return t.toUpperCase().replace(/[^A-Z]/g, "");
+}
 
 function run(){
-let w=clean(document.getElementById("word").value);
-if(!w)return;
+  const raw = document.getElementById("word").value;
+  const w = clean(raw);
+  if(!w) return;
 
-let res="",grid="";
+  let res = "";
+  let grid = "";
 
-ciphers.forEach(c=>{
-let seq=[...w].map(l=>c[1][l]||0);
-let total=seq.reduce((a,b)=>a+b,0);
+  ciphers.forEach(([name, map]) => {
+    const seq = [...w].map(l => map[l] || 0);
+    const total = seq.reduce((a, b) => a + b, 0);
 
-res+=`<div class="row"><div class="strip"><div class="line">
-<span class="name">${c[0]}</span>
-${seq.map(n=>`<span class="box">${n}</span>`).join("")}
-<span class="box total">${total}</span>
-</div></div></div>`;
+    res += `
+      <div class="row">
+        <div class="row-inner">
+          <div class="name">${name}</div>
+          <div class="seq-wrap">
+            <div class="seq">
+              ${seq.map(n => `<div class="box">${n}</div>`).join("")}
+            </div>
+          </div>
+          <div class="total">${total}</div>
+        </div>
+      </div>
+    `;
 
-grid+=`<div class="card"><span>${c[0]}</span><span>${total}</span></div>`;
-});
+    grid += `
+      <div class="card">
+        <span class="card-name">${name}</span>
+        <span class="card-total">${total}</span>
+      </div>
+    `;
+  });
 
-document.getElementById("results").innerHTML=res;
-document.getElementById("grid").innerHTML=grid;
-
-document.getElementById("results").classList.add("show");
-document.getElementById("matrixBox").classList.add("show");
+  document.getElementById("results").innerHTML = res;
+  document.getElementById("grid").innerHTML = grid;
+  document.getElementById("results").classList.add("show");
+  document.getElementById("matrixBox").classList.add("show");
 }
 
 /* MATRIX */
-let c=document.getElementById("matrix");
-let x=c.getContext("2d");
-let w,h,cols,drops;
-let font=16;
-let chars="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+let cw, ch, cols, drops;
+const fontSize = 16;
+const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-function setup(){
-w=c.width=window.innerWidth;
-h=c.height=window.innerHeight;
-cols=Math.floor(w/font);
-drops=Array(cols).fill(1);
+function setupMatrix(){
+  cw = canvas.width = window.innerWidth;
+  ch = canvas.height = window.innerHeight;
+  cols = Math.floor(cw / fontSize);
+  drops = Array(cols).fill(1);
 }
 
-function draw(){
-x.fillStyle="rgba(0,0,0,0.04)";
-x.fillRect(0,0,w,h);
-x.fillStyle="#00ff9c";
-x.font=font+"px monospace";
+function drawMatrix(){
+  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  ctx.fillRect(0, 0, cw, ch);
 
-for(let i=0;i<drops.length;i++){
-let t=chars[Math.floor(Math.random()*chars.length)];
-x.fillText(t,i*font,drops[i]*font);
-if(drops[i]*font>h && Math.random()>0.975)drops[i]=0;
-drops[i]++;
-}
+  ctx.fillStyle = "rgba(0,255,150,0.8)";
+  ctx.font = fontSize + "px monospace";
+
+  for(let i = 0; i < drops.length; i++){
+    const t = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(t, i * fontSize, drops[i] * fontSize);
+
+    if(drops[i] * fontSize > ch && Math.random() > 0.975){
+      drops[i] = 0;
+    }
+    drops[i]++;
+  }
 }
 
-setup();
-setInterval(draw,50);
-window.addEventListener("resize",setup);
+setupMatrix();
+setInterval(drawMatrix, 50);
+window.addEventListener("resize", setupMatrix);
 </script>
-
 </body>
 </html>
