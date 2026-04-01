@@ -140,17 +140,17 @@ button:hover{
 
 .row-inner{
   display:grid;
-  grid-template-columns:84px minmax(0,1fr);
+  grid-template-columns:96px minmax(0,1fr) 64px;
   align-items:center;
-  gap:6px;
+  gap:8px;
 }
 
 .name{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  height:42px;
-  padding:0 10px;
+  height:40px;
+  padding:0 8px;
   border-radius:10px;
   background:rgba(0,255,150,0.10);
   color:var(--green);
@@ -165,21 +165,20 @@ button:hover{
   overflow-x:auto;
   overflow-y:hidden;
   scrollbar-width:thin;
-  padding-bottom:2px;
 }
 
 .seq{
   display:grid;
   grid-auto-flow:column;
-  grid-auto-columns:56px;
+  grid-auto-columns:48px;
   gap:6px;
   width:max-content;
 }
 
 .box,
 .total{
-  width:56px;
-  height:42px;
+  width:48px;
+  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -198,6 +197,53 @@ button:hover{
   background:var(--total-bg);
   color:#dffff0;
   font-weight:700;
+  justify-self:end;
+  margin-left:4px;
+}
+
+.matrix-box{
+  display:none;
+  margin-top:14px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(0,0,0,0.22);
+}
+
+.matrix-box.show{
+  display:block;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+
+.card{
+  text-align:center;
+  padding:10px 8px;
+  border-radius:10px;
+  background:var(--soft);
+  min-width:0;
+}
+
+.card-name{
+  display:block;
+  color:#d6fff0;
+  font-size:13px;
+  margin-bottom:6px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.card-total{
+  display:block;
+  color:var(--green);
+  font-size:18px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
 }
 
 @media (max-width:700px){
@@ -216,7 +262,7 @@ button:hover{
   }
 
   .row-inner{
-    grid-template-columns:72px minmax(0,1fr);
+    grid-template-columns:72px minmax(0,1fr) 58px;
     gap:5px;
   }
 
@@ -227,13 +273,13 @@ button:hover{
   }
 
   .seq{
-    grid-auto-columns:50px;
+    grid-auto-columns:44px;
     gap:5px;
   }
 
   .box,
   .total{
-    width:50px;
+    width:44px;
     height:38px;
     font-size:16px;
   }
