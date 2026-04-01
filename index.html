@@ -1,494 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amber's Word Journal</title>
-  <style>
-    :root {
-      --bg: #030608;
-      --panel: rgba(7, 12, 16, 0.72);
-      --panel-border: rgba(110, 255, 180, 0.22);
-      --text: #ecfff4;
-      --muted: #9cc7af;
-      --accent: #7dffb5;
-      --accent-soft: rgba(125, 255, 181, 0.14);
-      --seq-bg: rgba(255, 255, 255, 0.03);
-      --seq-border: rgba(255, 255, 255, 0.06);
-      --total-bg: rgba(125, 255, 181, 0.18);
-      --total-border: rgba(125, 255, 181, 0.42);
-      --btn-bg: rgba(125, 255, 181, 0.12);
-      --btn-border: rgba(125, 255, 181, 0.34);
-      --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amber's Word Journal</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+body {
+  margin: 0;
+  background: #020506;
+  color: #ecfff5;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
 
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      overflow-x: hidden;
-    }
+#matrix {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
 
-    #matrix {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      display: block;
-      background: #020405;
-    }
+.app {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 18px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(0,255,150,0.2);
+  border-radius: 16px;
+}
 
-    .screen-glow {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at top, rgba(125,255,181,0.08), transparent 32%),
-        linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.28));
-    }
+h1 {
+  text-align: center;
+  color: #00ff9c;
+  margin: 0;
+}
 
-    .wrap {
-      position: relative;
-      z-index: 2;
-      width: min(980px, calc(100% - 24px));
-      margin: 24px auto;
-      padding: 18px;
-      border: 1px solid var(--panel-border);
-      border-radius: 18px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(7px);
-    }
+.sub {
+  text-align: center;
+  color: #9cc7af;
+  margin-bottom: 14px;
+}
 
-    h1 {
-      margin: 0 0 4px;
-      text-align: center;
-      color: var(--accent);
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      letter-spacing: 0.04em;
-    }
+.controls {
+  display: flex;
+  gap: 10px;
+}
 
-    .sub {
-      text-align: center;
-      margin: 0 0 16px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,150,0.3);
+  background: #000;
+  color: #fff;
+}
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 14px;
-    }
+button {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,150,0.3);
+  background: rgba(0,255,150,0.1);
+  color: #00ff9c;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .controls input {
-      flex: 1 1 420px;
-      max-width: 620px;
-      min-width: 220px;
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      border: 1px solid rgba(125,255,181,0.24);
-      border-radius: 12px;
-      padding: 14px 14px;
-      font-size: 1rem;
-      outline: none;
-    }
+.results {
+  display: none;
+  margin-top: 12px;
+}
 
-    .controls input::placeholder {
-      color: #9ab8a5;
-    }
+.results.show {
+  display: block;
+}
 
-    .controls button {
-      border: 1px solid var(--btn-border);
-      background: var(--btn-bg);
-      color: var(--accent);
-      border-radius: 12px;
-      padding: 13px 18px;
-      font-size: 0.98rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
+.row {
+  margin-bottom: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
 
-    .controls button:hover {
-      transform: translateY(-1px);
-      background: rgba(125, 255, 181, 0.18);
-    }
+.strip {
+  overflow-x: auto;
+}
 
-    .results {
-      display: none;
-      margin-top: 10px;
-    }
+.line {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
 
-    .results.show {
-      display: block;
-    }
+.name {
+  padding: 4px 6px;
+  background: rgba(0,255,150,0.1);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #00ff9c;
+}
 
-    .cipher-row {
-      margin-bottom: 10px;
-      padding: 8px 10px;
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.025);
-    }
+.box {
+  min-width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
 
-    .cipher-strip {
-      overflow-x: auto;
-      overflow-y: hidden;
-      scrollbar-width: thin;
-      padding-bottom: 2px;
-    }
+.total {
+  background: rgba(0,255,150,0.2);
+}
 
-    .cipher-strip::-webkit-scrollbar {
-      height: 8px;
-    }
+.matrix {
+  display: none;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid rgba(0,255,150,0.2);
+  border-radius: 12px;
+}
 
-    .cipher-strip::-webkit-scrollbar-thumb {
-      background: rgba(125,255,181,0.22);
-      border-radius: 999px;
-    }
+.matrix.show {
+  display: block;
+}
 
-    .cipher-line {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-width: max-content;
-      white-space: nowrap;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+}
 
-    .cipher-name {
-      flex: 0 0 auto;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 0.92rem;
-      letter-spacing: 0.02em;
-      padding: 6px 8px;
-      border-radius: 8px;
-      background: rgba(125,255,181,0.08);
-      border: 1px solid rgba(125,255,181,0.14);
-    }
+.card {
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+}
 
-    .seq-box,
-    .total-box {
-      flex: 0 0 auto;
-      min-width: 42px;
-      height: 42px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1rem;
-      line-height: 1;
-    }
-
-    .seq-box {
-      background: var(--seq-bg);
-      border: 1px solid var(--seq-border);
-      color: var(--text);
-    }
-
-    .total-box {
-      margin-left: 4px;
-      background: var(--total-bg);
-      border: 1px solid var(--total-border);
-      color: var(--accent);
-      box-shadow: inset 0 0 12px rgba(125,255,181,0.06);
-    }
-
-    .matrix-box {
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(125,255,181,0.18);
-      background: rgba(0,0,0,0.18);
-      display: none;
-    }
-
-    .matrix-box.show {
-      display: block;
-    }
-
-    .matrix-title {
-      margin: 0 0 10px;
-      color: var(--accent);
-      text-align: center;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-
-    .value-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(94px, 1fr));
-      gap: 10px;
-    }
-
-    .value-card {
-      border-radius: 12px;
-      padding: 10px 8px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      text-align: center;
-    }
-
-    .value-card .label {
-      display: block;
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .value-card .value {
-      display: block;
-      color: var(--accent);
-      font-size: 1.2rem;
-      font-weight: 800;
-    }
-
-    .error {
-      display: none;
-      margin-top: 10px;
-      color: #ffb8b8;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .error.show {
-      display: block;
-    }
-
-    @media (max-width: 640px) {
-      .wrap {
-        margin: 12px auto;
-        padding: 14px;
-      }
-
-      .controls {
-        flex-direction: column;
-      }
-
-      .controls input,
-      .controls button {
-        width: 100%;
-        max-width: none;
-      }
-
-      .cipher-name {
-        font-size: 0.86rem;
-        padding: 6px 7px;
-      }
-
-      .seq-box,
-      .total-box {
-        min-width: 40px;
-        height: 40px;
-        font-size: 0.95rem;
-      }
-    }
-  </style>
+.card span {
+  display: block;
+}
+</style>
 </head>
+
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="screen-glow"></div>
 
-  <div class="wrap">
-    <h1>Amber's Word Journal</h1>
-    <p class="sub">Type a word and tap Generate</p>
+<canvas id="matrix"></canvas>
 
-    <div class="controls">
-      <input id="wordInput" type="text" placeholder="Enter a word or phrase" />
-      <button id="generateBtn">Generate</button>
-    </div>
+<div class="app">
+<h1>Amber's Word Journal</h1>
+<p class="sub">Type a word and tap Generate</p>
 
-    <div id="error" class="error">Please enter a word.</div>
+<div class="controls">
+<input id="word" placeholder="Enter word">
+<button onclick="run()">Generate</button>
+</div>
 
-    <div id="results" class="results"></div>
+<div id="results" class="results"></div>
 
-    <div id="matrixBox" class="matrix-box">
-      <div class="matrix-title">Matrix</div>
-      <div id="valueGrid" class="value-grid"></div>
-    </div>
-  </div>
+<div id="matrixBox" class="matrix">
+<div class="grid" id="grid"></div>
+</div>
+</div>
 
-  <script>
-    const wordInput = document.getElementById("wordInput");
-    const generateBtn = document.getElementById("generateBtn");
-    const results = document.getElementById("results");
-    const matrixBox = document.getElementById("matrixBox");
-    const valueGrid = document.getElementById("valueGrid");
-    const errorBox = document.getElementById("error");
+<script>
+const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function mapSimple(){let m={};for(let i=0;i<26;i++)m[A[i]]=i+1;return m;}
+function mapReverse(){let m={};for(let i=0;i<26;i++)m[A[i]]=26-i;return m;}
+function mapEnglish(){let m={};for(let i=0;i<26;i++)m[A[i]]=(i+1)*6;return m;}
+function mapReduced(){let m={};for(let i=0;i<26;i++)m[A[i]]=((i)%9)+1;return m;}
+function mapRevReduced(){let m={};for(let i=0;i<26;i++){let r=26-i;m[A[i]]=((r-1)%9)+1;}return m;}
 
-    const simpleMap = {};
-    const reverseMap = {};
-    const englishMap = {};
-    const jewishMap = {};
-    const reducedMap = {};
-    const pythMap = {};
-    const chaldeanMap = {};
-    const septenaryMap = {};
+const jewish=[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800];
+function mapJewish(){let m={};for(let i=0;i<26;i++)m[A[i]]=jewish[i];return m;}
 
-    for (let i = 0; i < 26; i++) {
-      const letter = alphabet[i];
-      const pos = i + 1;
-      simpleMap[letter] = pos;
-      reverseMap[letter] = 26 - i;
-      englishMap[letter] = pos * 6;
-      reducedMap[letter] = ((pos - 1) % 9) + 1;
-      pythMap[letter] = ((pos - 1) % 9) + 1;
-      septenaryMap[letter] = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1][i];
-    }
+const chald={A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7};
 
-    const jewishValues = [
-      1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800
-    ];
-    for (let i = 0; i < 26; i++) {
-      jewishMap[alphabet[i]] = jewishValues[i];
-    }
+const sept=[1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
+function mapSept(){let m={};for(let i=0;i<26;i++)m[A[i]]=sept[i];return m;}
 
-    const chaldeanAssignments = {
-      A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
-      N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
-    };
-    Object.assign(chaldeanMap, chaldeanAssignments);
+const ciphers=[
+["Simpφle",mapSimple()],
+["Reverse",mapReverse()],
+["English",mapEnglish()],
+["Jwsh",mapJewish()],
+["Rev Red",mapRevReduced()],
+["Pythφ",mapReduced()],
+["Chaldean",chald],
+["Seφt",mapSept()]
+];
 
-    const revReducedMap = {};
-    for (let i = 0; i < 26; i++) {
-      const reversePos = 26 - i;
-      revReducedMap[alphabet[i]] = ((reversePos - 1) % 9) + 1;
-    }
+function clean(t){return t.toUpperCase().replace(/[^A-Z]/g,"");}
 
-    const ciphers = [
-      { name: "Simpφle", map: simpleMap, key: "simple" },
-      { name: "Reverse", map: reverseMap, key: "reverse" },
-      { name: "English", map: englishMap, key: "english" },
-      { name: "Jwsh", map: jewishMap, key: "jewish" },
-      { name: "Rev Red", map: revReducedMap, key: "revReduced" },
-      { name: "Pythφ", map: pythMap, key: "pythagorean" },
-      { name: "Chaldean", map: chaldeanMap, key: "chaldean" },
-      { name: "Seφt", map: septenaryMap, key: "septenary" }
-    ];
+function run(){
+let w=clean(document.getElementById("word").value);
+if(!w)return;
 
-    function cleanText(text) {
-      return (text || "").toUpperCase().replace(/[^A-Z]/g, "");
-    }
+let res="",grid="";
 
-    function getSequence(text, map) {
-      const chars = cleanText(text).split("");
-      return chars.map(ch => map[ch] || 0);
-    }
+ciphers.forEach(c=>{
+let seq=[...w].map(l=>c[1][l]||0);
+let total=seq.reduce((a,b)=>a+b,0);
 
-    function getTotal(sequence) {
-      return sequence.reduce((sum, n) => sum + n, 0);
-    }
+res+=`<div class="row"><div class="strip"><div class="line">
+<span class="name">${c[0]}</span>
+${seq.map(n=>`<span class="box">${n}</span>`).join("")}
+<span class="box total">${total}</span>
+</div></div></div>`;
 
-    function makeCipherRow(cipher, sequence, total) {
-      const boxes = sequence.map(n => `<span class="seq-box">${n}</span>`).join("");
-      return `
-        <div class="cipher-row">
-          <div class="cipher-strip">
-            <div class="cipher-line">
-              <span class="cipher-name">${cipher.name}</span>
-              ${boxes}
-              <span class="total-box">${total}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
+grid+=`<div class="card"><span>${c[0]}</span><span>${total}</span></div>`;
+});
 
-    function render(word) {
-      const cleaned = cleanText(word);
+document.getElementById("results").innerHTML=res;
+document.getElementById("grid").innerHTML=grid;
 
-      if (!cleaned) {
-        errorBox.classList.add("show");
-        results.classList.remove("show");
-        matrixBox.classList.remove("show");
-        results.innerHTML = "";
-        valueGrid.innerHTML = "";
-        return;
-      }
+document.getElementById("results").classList.add("show");
+document.getElementById("matrixBox").classList.add("show");
+}
 
-      errorBox.classList.remove("show");
+/* MATRIX */
+let c=document.getElementById("matrix");
+let x=c.getContext("2d");
+let w,h,cols,drops;
+let font=16;
+let chars="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-      let rowsHtml = "";
-      let matrixHtml = "";
+function setup(){
+w=c.width=window.innerWidth;
+h=c.height=window.innerHeight;
+cols=Math.floor(w/font);
+drops=Array(cols).fill(1);
+}
 
-      ciphers.forEach(cipher => {
-        const sequence = getSequence(cleaned, cipher.map);
-        const total = getTotal(sequence);
-        rowsHtml += makeCipherRow(cipher, sequence, total);
+function draw(){
+x.fillStyle="rgba(0,0,0,0.04)";
+x.fillRect(0,0,w,h);
+x.fillStyle="#00ff9c";
+x.font=font+"px monospace";
 
-        matrixHtml += `
-          <div class="value-card">
-            <span class="label">${cipher.name}</span>
-            <span class="value">${total}</span>
-          </div>
-        `;
-      });
+for(let i=0;i<drops.length;i++){
+let t=chars[Math.floor(Math.random()*chars.length)];
+x.fillText(t,i*font,drops[i]*font);
+if(drops[i]*font>h && Math.random()>0.975)drops[i]=0;
+drops[i]++;
+}
+}
 
-      results.innerHTML = rowsHtml;
-      valueGrid.innerHTML = matrixHtml;
+setup();
+setInterval(draw,50);
+window.addEventListener("resize",setup);
+</script>
 
-      results.classList.add("show");
-      matrixBox.classList.add("show");
-    }
-
-    generateBtn.addEventListener("click", () => {
-      render(wordInput.value);
-    });
-
-    wordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        render(wordInput.value);
-      }
-    });
-
-    /* MATRIX RAIN */
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-
-    let width, height, columns, drops, fontSize;
-    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソ";
-
-    function setupMatrix() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      fontSize = Math.max(14, Math.min(22, window.innerWidth / 70));
-      columns = Math.floor(width / fontSize);
-      drops = Array(columns).fill(1);
-    }
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(2, 4, 5, 0.12)";
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = "#6dffae";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    setupMatrix();
-    setInterval(drawMatrix, 48);
-    window.addEventListener("resize", setupMatrix);
-  </script>
 </body>
 </html>
