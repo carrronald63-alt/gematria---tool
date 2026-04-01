@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ambers Word Journal — Gematria Tool</title>
+  <title>Amber's Word Journal</title>
   <style>
     :root {
-      --bg: #05090d;
-      --panel: rgba(10, 16, 22, 0.90);
-      --panel-2: rgba(16, 24, 34, 0.94);
-      --line: rgba(110, 190, 140, 0.16);
-      --line-strong: rgba(110, 220, 150, 0.28);
-      --text: #ecfff1;
-      --muted: #9ec7aa;
-      --accent: #72ff9f;
-      --accent-soft: rgba(114, 255, 159, 0.12);
-      --seq-bg: rgba(22, 38, 28, 0.78);
-      --seq-border: rgba(106, 255, 150, 0.22);
-      --total-bg: rgba(49, 33, 10, 0.92);
-      --total-border: rgba(255, 205, 94, 0.30);
-      --total-text: #ffd978;
-      --shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
-      --radius: 18px;
+      --bg: #030608;
+      --panel: rgba(7, 12, 16, 0.72);
+      --panel-border: rgba(110, 255, 180, 0.22);
+      --text: #ecfff4;
+      --muted: #9cc7af;
+      --accent: #7dffb5;
+      --accent-soft: rgba(125, 255, 181, 0.14);
+      --seq-bg: rgba(255, 255, 255, 0.03);
+      --seq-border: rgba(255, 255, 255, 0.06);
+      --total-bg: rgba(125, 255, 181, 0.18);
+      --total-border: rgba(125, 255, 181, 0.42);
+      --btn-bg: rgba(125, 255, 181, 0.12);
+      --btn-border: rgba(125, 255, 181, 0.34);
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
     }
 
     * {
@@ -31,612 +29,465 @@
     html, body {
       margin: 0;
       min-height: 100%;
-      font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
     }
 
-    #matrixCanvas {
+    #matrix {
       position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
       z-index: 0;
-      opacity: 0.42;
-      pointer-events: none;
+      display: block;
+      background: #020405;
     }
 
-    .bg-glow {
+    .screen-glow {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(circle at top center, rgba(82, 255, 149, 0.08), transparent 30%),
-        radial-gradient(circle at 20% 30%, rgba(82, 255, 149, 0.05), transparent 20%),
-        linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0,0,0,0.28));
+        radial-gradient(circle at top, rgba(125,255,181,0.08), transparent 32%),
+        linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.28));
     }
 
     .wrap {
       position: relative;
       z-index: 2;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .hero {
+      width: min(980px, calc(100% - 24px));
+      margin: 24px auto;
+      padding: 18px;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 26px;
-      padding: 22px 20px 18px;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
-      margin-bottom: 18px;
+      backdrop-filter: blur(7px);
     }
 
     h1 {
-      margin: 0 0 6px;
-      font-size: clamp(1.7rem, 3vw, 2.8rem);
-      line-height: 1.1;
-      letter-spacing: 0.02em;
+      margin: 0 0 4px;
+      text-align: center;
+      color: var(--accent);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      letter-spacing: 0.04em;
     }
 
     .sub {
-      margin: 0;
+      text-align: center;
+      margin: 0 0 16px;
       color: var(--muted);
-      font-size: 0.98rem;
+      font-size: 0.95rem;
     }
 
     .controls {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
-      margin-top: 18px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 14px;
     }
 
-    input[type="text"] {
-      width: 100%;
-      background: rgba(6, 14, 10, 0.84);
+    .controls input {
+      flex: 1 1 420px;
+      max-width: 620px;
+      min-width: 220px;
+      background: rgba(255,255,255,0.04);
       color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px 16px;
+      border: 1px solid rgba(125,255,181,0.24);
+      border-radius: 12px;
+      padding: 14px 14px;
       font-size: 1rem;
       outline: none;
     }
 
-    input[type="text"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(114, 255, 159, 0.12);
+    .controls input::placeholder {
+      color: #9ab8a5;
     }
 
-    button {
-      border: 1px solid var(--line);
-      background: rgba(14, 27, 20, 0.95);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 0 18px;
+    .controls button {
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--accent);
+      border-radius: 12px;
+      padding: 13px 18px;
       font-size: 0.98rem;
+      font-weight: 700;
       cursor: pointer;
-      min-height: 50px;
-      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
 
-    button:hover {
+    .controls button:hover {
       transform: translateY(-1px);
-      border-color: var(--accent);
-      background: rgba(22, 42, 31, 1);
+      background: rgba(125, 255, 181, 0.18);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 18px;
+    .results {
+      display: none;
+      margin-top: 10px;
     }
 
-    .card {
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
+    .results.show {
+      display: block;
     }
 
-    .card-head {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
+    .cipher-row {
+      margin-bottom: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.025);
     }
 
-    .card-head h2 {
-      margin: 0;
-      font-size: 1.05rem;
-      letter-spacing: 0.02em;
-    }
-
-    .tiny {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .results-scroll {
+    .cipher-strip {
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 14px;
+      scrollbar-width: thin;
+      padding-bottom: 2px;
     }
 
-    .results-board {
-      min-width: 780px;
-      display: grid;
-      gap: 10px;
+    .cipher-strip::-webkit-scrollbar {
+      height: 8px;
     }
 
-    .result-row {
-      display: grid;
-      grid-template-columns: 168px minmax(390px, 1fr) 94px;
-      gap: 10px;
-      align-items: stretch;
+    .cipher-strip::-webkit-scrollbar-thumb {
+      background: rgba(125,255,181,0.22);
+      border-radius: 999px;
     }
 
-    .cipher-name,
-    .sequence-box,
-    .total-box {
-      border-radius: 14px;
-      min-height: 58px;
-      display: flex;
+    .cipher-line {
+      display: inline-flex;
       align-items: center;
-    }
-
-    .cipher-name {
-      padding: 0 14px;
-      background: rgba(9, 20, 15, 0.96);
-      border: 1px solid var(--line);
-      font-weight: 700;
-      letter-spacing: 0.03em;
+      gap: 6px;
+      min-width: max-content;
       white-space: nowrap;
     }
 
-    .sequence-box {
-      background: var(--seq-bg);
-      border: 1px solid var(--seq-border);
-      padding: 8px 12px;
-      overflow-x: auto;
-      justify-content: flex-end;
+    .cipher-name {
+      flex: 0 0 auto;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(125,255,181,0.08);
+      border: 1px solid rgba(125,255,181,0.14);
     }
 
-    .sequence {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      width: 100%;
-      min-width: max-content;
-    }
-
-    .num {
-      min-width: 36px;
-      height: 36px;
-      padding: 0 8px;
-      border-radius: 10px;
+    .seq-box,
+    .total-box {
+      flex: 0 0 auto;
+      min-width: 42px;
+      height: 42px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: rgba(114, 255, 159, 0.08);
-      border: 1px solid rgba(114, 255, 159, 0.14);
+      border-radius: 10px;
       font-weight: 700;
-      font-size: 0.96rem;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+      font-size: 1rem;
+      line-height: 1;
     }
 
-    .gap {
-      min-width: 14px;
-      height: 1px;
-      opacity: 0;
+    .seq-box {
+      background: var(--seq-bg);
+      border: 1px solid var(--seq-border);
+      color: var(--text);
     }
 
     .total-box {
-      justify-content: center;
+      margin-left: 4px;
       background: var(--total-bg);
       border: 1px solid var(--total-border);
-      color: var(--total-text);
-      font-weight: 800;
-      font-size: 1.08rem;
-      letter-spacing: 0.02em;
+      color: var(--accent);
+      box-shadow: inset 0 0 12px rgba(125,255,181,0.06);
     }
 
-    .alpha-wrap {
+    .matrix-box {
+      margin-top: 18px;
       padding: 14px;
-      display: grid;
-      gap: 14px;
-      max-height: 78vh;
-      overflow: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(125,255,181,0.18);
+      background: rgba(0,0,0,0.18);
+      display: none;
     }
 
-    .alpha-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow: hidden;
-      background: rgba(10, 18, 14, 0.94);
+    .matrix-box.show {
+      display: block;
     }
 
-    .alpha-title {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--line);
+    .matrix-title {
+      margin: 0 0 10px;
+      color: var(--accent);
+      text-align: center;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      background: rgba(17, 31, 24, 0.96);
+      letter-spacing: 0.04em;
     }
 
-    .alpha-grid {
+    .value-grid {
       display: grid;
-      grid-template-columns: repeat(13, minmax(44px, 1fr));
-      gap: 8px;
-      padding: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(94px, 1fr));
+      gap: 10px;
     }
 
-    .alpha-cell {
-      border: 1px solid var(--line);
+    .value-card {
       border-radius: 12px;
-      min-height: 54px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(7, 15, 11, 0.88);
+      padding: 10px 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
     }
 
-    .letter {
+    .value-card .label {
+      display: block;
       font-size: 0.78rem;
       color: var(--muted);
-      margin-bottom: 2px;
-      text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
-    .val {
-      font-size: 0.95rem;
+    .value-card .value {
+      display: block;
+      color: var(--accent);
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .error {
+      display: none;
+      margin-top: 10px;
+      color: #ffb8b8;
+      text-align: center;
       font-weight: 700;
     }
 
-    .footer-note {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-      padding-bottom: 10px;
+    .error.show {
+      display: block;
     }
 
-    @media (max-width: 980px) {
-      .grid {
-        grid-template-columns: 1fr;
+    @media (max-width: 640px) {
+      .wrap {
+        margin: 12px auto;
+        padding: 14px;
       }
 
-      .alpha-wrap {
-        max-height: none;
-      }
-    }
-
-    @media (max-width: 700px) {
       .controls {
-        grid-template-columns: 1fr;
+        flex-direction: column;
       }
 
-      .result-row {
-        grid-template-columns: 145px minmax(300px, 1fr) 82px;
+      .controls input,
+      .controls button {
+        width: 100%;
+        max-width: none;
       }
 
-      .results-board {
-        min-width: 650px;
+      .cipher-name {
+        font-size: 0.86rem;
+        padding: 6px 7px;
       }
 
-      .alpha-grid {
-        grid-template-columns: repeat(6, minmax(44px, 1fr));
+      .seq-box,
+      .total-box {
+        min-width: 40px;
+        height: 40px;
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
-  <canvas id="matrixCanvas"></canvas>
-  <div class="bg-glow"></div>
+  <canvas id="matrix"></canvas>
+  <div class="screen-glow"></div>
 
   <div class="wrap">
-    <section class="hero">
-      <h1>Ambers Word Journal</h1>
-      <p class="sub">Type a word or phrase and tap Generate.</p>
+    <h1>Amber's Word Journal</h1>
+    <p class="sub">Type a word and tap Generate</p>
 
-      <div class="controls">
-        <input
-          id="wordInput"
-          type="text"
-          placeholder="Enter a word or phrase"
-          autocomplete="off"
-        />
-        <button id="generateBtn">Generate</button>
-        <button id="clearBtn">Clear</button>
-      </div>
-    </section>
+    <div class="controls">
+      <input id="wordInput" type="text" placeholder="Enter a word or phrase" />
+      <button id="generateBtn">Generate</button>
+    </div>
 
-    <section class="grid">
-      <div class="card">
-        <div class="card-head">
-          <h2>Cipher Sequences</h2>
-          <div class="tiny">totals on right</div>
-        </div>
+    <div id="error" class="error">Please enter a word.</div>
 
-        <div class="results-scroll">
-          <div id="resultsBoard" class="results-board"></div>
-        </div>
-      </div>
+    <div id="results" class="results"></div>
 
-      <div class="card">
-        <div class="card-head">
-          <h2>Cipher Box</h2>
-          <div class="tiny">letter values</div>
-        </div>
-        <div id="alphaWrap" class="alpha-wrap"></div>
-      </div>
-    </section>
-
-    <div class="footer-note">
-      Simφle • Reverse • English • Jwsh • Rev. Reduced • Φythagorean • Chaldean • Seφtenary
+    <div id="matrixBox" class="matrix-box">
+      <div class="matrix-title">Matrix</div>
+      <div id="valueGrid" class="value-grid"></div>
     </div>
   </div>
 
   <script>
-    const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
-
-    const ciphers = [
-      {
-        name: "Simφle",
-        map: (() => {
-          const m = {};
-          alphabet.forEach((ch, i) => m[ch] = i + 1);
-          return m;
-        })()
-      },
-      {
-        name: "Reverse",
-        map: (() => {
-          const m = {};
-          alphabet.forEach((ch, i) => m[ch] = 26 - i);
-          return m;
-        })()
-      },
-      {
-        name: "English",
-        map: (() => {
-          const m = {};
-          alphabet.forEach((ch, i) => m[ch] = (i + 1) * 6);
-          return m;
-        })()
-      },
-      {
-        name: "Jwsh",
-        map: {
-          a: 1,   b: 2,   c: 3,   d: 4,   e: 5,   f: 6,   g: 7,   h: 8,   i: 9,
-          j: 600, k: 10,  l: 20,  m: 30,  n: 40,  o: 50,  p: 60,  q: 70,  r: 80,
-          s: 90,  t: 100, u: 200, v: 700, w: 900, x: 300, y: 400, z: 500
-        }
-      },
-      {
-        name: "Rev. Reduced",
-        map: (() => {
-          const m = {};
-          alphabet.forEach((ch, i) => {
-            const reverseValue = 26 - i;
-            m[ch] = ((reverseValue - 1) % 9) + 1;
-          });
-          return m;
-        })()
-      },
-      {
-        name: "Φythagorean",
-        map: (() => {
-          const m = {};
-          alphabet.forEach((ch, i) => m[ch] = (i % 9) + 1);
-          return m;
-        })()
-      },
-      {
-        name: "Chaldean",
-        map: {
-          a: 1, b: 2, c: 3, d: 4, e: 5, f: 8, g: 3, h: 5, i: 1,
-          j: 1, k: 2, l: 3, m: 4, n: 5, o: 7, p: 8, q: 1, r: 2,
-          s: 3, t: 4, u: 6, v: 6, w: 6, x: 5, y: 1, z: 7
-        }
-      },
-      {
-        name: "Seφtenary",
-        map: {
-          a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 6, i: 5,
-          j: 4, k: 3, l: 2, m: 1, n: 1, o: 2, p: 3, q: 4, r: 5,
-          s: 6, t: 7, u: 6, v: 5, w: 4, x: 3, y: 2, z: 1
-        }
-      }
-    ];
-
     const wordInput = document.getElementById("wordInput");
     const generateBtn = document.getElementById("generateBtn");
-    const clearBtn = document.getElementById("clearBtn");
-    const resultsBoard = document.getElementById("resultsBoard");
-    const alphaWrap = document.getElementById("alphaWrap");
+    const results = document.getElementById("results");
+    const matrixBox = document.getElementById("matrixBox");
+    const valueGrid = document.getElementById("valueGrid");
+    const errorBox = document.getElementById("error");
+
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const simpleMap = {};
+    const reverseMap = {};
+    const englishMap = {};
+    const jewishMap = {};
+    const reducedMap = {};
+    const pythMap = {};
+    const chaldeanMap = {};
+    const septenaryMap = {};
+
+    for (let i = 0; i < 26; i++) {
+      const letter = alphabet[i];
+      const pos = i + 1;
+      simpleMap[letter] = pos;
+      reverseMap[letter] = 26 - i;
+      englishMap[letter] = pos * 6;
+      reducedMap[letter] = ((pos - 1) % 9) + 1;
+      pythMap[letter] = ((pos - 1) % 9) + 1;
+      septenaryMap[letter] = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1][i];
+    }
+
+    const jewishValues = [
+      1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800
+    ];
+    for (let i = 0; i < 26; i++) {
+      jewishMap[alphabet[i]] = jewishValues[i];
+    }
+
+    const chaldeanAssignments = {
+      A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
+      N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
+    };
+    Object.assign(chaldeanMap, chaldeanAssignments);
+
+    const revReducedMap = {};
+    for (let i = 0; i < 26; i++) {
+      const reversePos = 26 - i;
+      revReducedMap[alphabet[i]] = ((reversePos - 1) % 9) + 1;
+    }
+
+    const ciphers = [
+      { name: "Simpφle", map: simpleMap, key: "simple" },
+      { name: "Reverse", map: reverseMap, key: "reverse" },
+      { name: "English", map: englishMap, key: "english" },
+      { name: "Jwsh", map: jewishMap, key: "jewish" },
+      { name: "Rev Red", map: revReducedMap, key: "revReduced" },
+      { name: "Pythφ", map: pythMap, key: "pythagorean" },
+      { name: "Chaldean", map: chaldeanMap, key: "chaldean" },
+      { name: "Seφt", map: septenaryMap, key: "septenary" }
+    ];
 
     function cleanText(text) {
-      return (text || "").toLowerCase();
+      return (text || "").toUpperCase().replace(/[^A-Z]/g, "");
     }
 
     function getSequence(text, map) {
       const chars = cleanText(text).split("");
-      const seq = [];
-
-      chars.forEach((ch) => {
-        if (map[ch] !== undefined) {
-          seq.push({ type: "num", value: map[ch] });
-        } else if (ch === " ") {
-          seq.push({ type: "gap", value: "" });
-        }
-      });
-
-      return seq;
+      return chars.map(ch => map[ch] || 0);
     }
 
     function getTotal(sequence) {
-      return sequence.reduce((sum, item) => {
-        if (item.type === "num") return sum + item.value;
-        return sum;
-      }, 0);
+      return sequence.reduce((sum, n) => sum + n, 0);
     }
 
-    function renderResults(text) {
-      resultsBoard.innerHTML = "";
+    function makeCipherRow(cipher, sequence, total) {
+      const boxes = sequence.map(n => `<span class="seq-box">${n}</span>`).join("");
+      return `
+        <div class="cipher-row">
+          <div class="cipher-strip">
+            <div class="cipher-line">
+              <span class="cipher-name">${cipher.name}</span>
+              ${boxes}
+              <span class="total-box">${total}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-      ciphers.forEach((cipher) => {
-        const seq = getSequence(text, cipher.map);
-        const total = getTotal(seq);
+    function render(word) {
+      const cleaned = cleanText(word);
 
-        const row = document.createElement("div");
-        row.className = "result-row";
+      if (!cleaned) {
+        errorBox.classList.add("show");
+        results.classList.remove("show");
+        matrixBox.classList.remove("show");
+        results.innerHTML = "";
+        valueGrid.innerHTML = "";
+        return;
+      }
 
-        const name = document.createElement("div");
-        name.className = "cipher-name";
-        name.textContent = cipher.name;
+      errorBox.classList.remove("show");
 
-        const seqBox = document.createElement("div");
-        seqBox.className = "sequence-box";
+      let rowsHtml = "";
+      let matrixHtml = "";
 
-        const seqInner = document.createElement("div");
-        seqInner.className = "sequence";
+      ciphers.forEach(cipher => {
+        const sequence = getSequence(cleaned, cipher.map);
+        const total = getTotal(sequence);
+        rowsHtml += makeCipherRow(cipher, sequence, total);
 
-        if (seq.length === 0) {
-          const empty = document.createElement("span");
-          empty.style.color = "var(--muted)";
-          empty.textContent = "—";
-          seqInner.appendChild(empty);
-        } else {
-          seq.forEach((item) => {
-            const el = document.createElement("span");
-            el.className = item.type === "num" ? "num" : "gap";
-            el.textContent = item.type === "num" ? item.value : "";
-            seqInner.appendChild(el);
-          });
-        }
-
-        seqBox.appendChild(seqInner);
-
-        const totalBox = document.createElement("div");
-        totalBox.className = "total-box";
-        totalBox.textContent = total;
-
-        row.appendChild(name);
-        row.appendChild(seqBox);
-        row.appendChild(totalBox);
-        resultsBoard.appendChild(row);
+        matrixHtml += `
+          <div class="value-card">
+            <span class="label">${cipher.name}</span>
+            <span class="value">${total}</span>
+          </div>
+        `;
       });
+
+      results.innerHTML = rowsHtml;
+      valueGrid.innerHTML = matrixHtml;
+
+      results.classList.add("show");
+      matrixBox.classList.add("show");
     }
 
-    function renderCipherBoxes() {
-      alphaWrap.innerHTML = "";
-
-      ciphers.forEach((cipher) => {
-        const card = document.createElement("div");
-        card.className = "alpha-card";
-
-        const title = document.createElement("div");
-        title.className = "alpha-title";
-        title.textContent = cipher.name;
-
-        const grid = document.createElement("div");
-        grid.className = "alpha-grid";
-
-        alphabet.forEach((letter) => {
-          const cell = document.createElement("div");
-          cell.className = "alpha-cell";
-
-          const l = document.createElement("div");
-          l.className = "letter";
-          l.textContent = letter;
-
-          const v = document.createElement("div");
-          v.className = "val";
-          v.textContent = cipher.map[letter];
-
-          cell.appendChild(l);
-          cell.appendChild(v);
-          grid.appendChild(cell);
-        });
-
-        card.appendChild(title);
-        card.appendChild(grid);
-        alphaWrap.appendChild(card);
-      });
-    }
-
-    function generate() {
-      renderResults(wordInput.value.trim());
-    }
-
-    generateBtn.addEventListener("click", generate);
-
-    clearBtn.addEventListener("click", () => {
-      wordInput.value = "";
-      renderResults("");
-      wordInput.focus();
+    generateBtn.addEventListener("click", () => {
+      render(wordInput.value);
     });
 
     wordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") generate();
+      if (e.key === "Enter") {
+        render(wordInput.value);
+      }
     });
 
-    renderCipherBoxes();
-    renderResults("");
-
     /* MATRIX RAIN */
-    const canvas = document.getElementById("matrixCanvas");
+    const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
 
-    let width = 0;
-    let height = 0;
-    let fontSize = 18;
-    let columns = 0;
-    let drops = [];
-    const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$+-*/=%<>λφ";
+    let width, height, columns, drops, fontSize;
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソ";
 
     function setupMatrix() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      fontSize = Math.max(14, Math.min(22, window.innerWidth / 70));
       columns = Math.floor(width / fontSize);
       drops = Array(columns).fill(1);
     }
 
     function drawMatrix() {
-      ctx.fillStyle = "rgba(5, 9, 13, 0.08)";
+      ctx.fillStyle = "rgba(2, 4, 5, 0.12)";
       ctx.fillRect(0, 0, width, height);
 
-      ctx.fillStyle = "#72ff9f";
+      ctx.fillStyle = "#6dffae";
       ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
         const text = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-        ctx.fillText(text, x, y);
-
-        if (y > height && Math.random() > 0.975) {
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
           drops[i] = 0;
         }
-
         drops[i]++;
       }
     }
 
     setupMatrix();
-    setInterval(drawMatrix, 50);
+    setInterval(drawMatrix, 48);
     window.addEventListener("resize", setupMatrix);
   </script>
 </body>
