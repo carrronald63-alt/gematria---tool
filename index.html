@@ -10,7 +10,7 @@
       background: black;
       color: white;
       font-family: monospace;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     #matrix {
@@ -156,30 +156,30 @@ const fontSize = 16;
 let columns = canvas.width / fontSize;
 
 let drops = [];
-for(let i=0;i<columns;i++){
-  drops[i]=1;
+for(let i = 0; i < columns; i++) {
+  drops[i] = 1;
 }
 
-function draw(){
-  ctx.fillStyle="rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+function draw() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle="#00ff66";
-  ctx.font=fontSize+"px monospace";
+  ctx.fillStyle = "#00ff66";
+  ctx.font = fontSize + "px monospace";
 
-  for(let i=0;i<drops.length;i++){
-    let text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+  for (let i = 0; i < drops.length; i++) {
+    let text = letters[Math.floor(Math.random() * letters.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-    if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
-      drops[i]=0;
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
     }
 
     drops[i]++;
   }
 }
 
-setInterval(draw,50);
+setInterval(draw, 50);
 </script>
 
 </body>
