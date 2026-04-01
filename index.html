@@ -16,11 +16,19 @@
     h1 {
       color: #00ffcc;
       letter-spacing: 2px;
+      text-align: center;
       margin-bottom: 10px;
     }
 
     p {
+      text-align: center;
       margin-bottom: 20px;
+      color: #bbb;
+    }
+
+    .controls {
+      text-align: center;
+      margin-bottom: 24px;
     }
 
     input {
@@ -42,47 +50,55 @@
       margin-left: 8px;
       font-family: monospace;
       cursor: pointer;
+      font-weight: bold;
     }
 
     #output {
-      margin-top: 24px;
-      width: 100%;
+      margin: 24px auto 0;
       max-width: 1100px;
     }
 
     .row {
       display: grid;
-      grid-template-columns: 160px 1fr 90px;
+      grid-template-columns: 170px 1fr 90px;
       gap: 16px;
       align-items: start;
-      margin: 6px 0;
+      margin: 8px 0;
+      padding: 10px 12px;
+      border: 1px solid #1f1f1f;
+      background: #0a0a0a;
     }
 
     .label {
-      color: #9fffe9;
+      color: #00ffcc;
+      font-weight: bold;
       white-space: nowrap;
     }
 
     .sequence {
+      color: white;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
     .total {
-      color: #00ffcc;
+      color: #ffcc00;
       text-align: right;
       white-space: nowrap;
       font-weight: bold;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
 
   <h1>Amber’s Word Journal 🦋</h1>
-  <p>enter a word and reveal the numbers</p>
+  <p>type a word and tap Generate</p>
 
-  <input id="word" placeholder="word" onkeydown="if(event.key==='Enter') generate()">
-  <button onclick="generate()">Generate</button>
+  <div class="controls">
+    <input id="word" placeholder="word" onkeydown="if(event.key==='Enter') generate()">
+    <button onclick="generate()">Generate</button>
+  </div>
 
   <div id="output"></div>
 
@@ -127,23 +143,16 @@
         const row = document.createElement("div");
         row.className = "row";
 
-        const label = document.createElement("div");
-        label.className = "label";
-        label.textContent = cipher.name;
-
-        const sequence = document.createElement("div");
-        sequence.className = "sequence";
-        sequence.textContent = seq.join(" ");
-
-        const totalDiv = document.createElement("div");
-        totalDiv.className = "total";
-        totalDiv.textContent = total;
-
-        row.appendChild(label);
-        row.appendChild(sequence);
-        row.appendChild(totalDiv);
+        row.innerHTML = `
+          <div class="label">${cipher.name}</div>
+          <div class="sequence">${seq.join(" ")}</div>
+          <div class="total">${total}</div>
+        `;
 
         output.appendChild(row);
       });
     }
   </script>
+
+</body>
+</html>
