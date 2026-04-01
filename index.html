@@ -1,294 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amber’s Word Journal 🦋</title>
-<style>
-  * {
-    box-sizing: border-box;
-  }
- 
-
-  body {
-    margin: 0;
-    background: #000;
-    color: #00ffcc;
-    font-family: monospace;
-    overflow-x: hidden;
-  }
-
-  #matrix {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    display: block;
-  }
-
-  .app {
-    position: relative;
-    z-index: 1;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 24px 16px 40px;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.55);
-  }
-
-  h1 {
-    margin: 0 0 10px;
-    font-size: 2rem;
-    color: #7fffd4;
-    text-shadow: 0 0 8px rgba(0,255,170,0.35);
-  }
-
-  p {
-    margin: 0 0 18px;
-    color: #b8ffe9;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 22px;
-  }
-
-  input {
-    padding: 12px;
-    font-size: 16px;
-    min-width: 260px;
-    border: 1px solid #00aa88;
-    background: #07110f;
-    color: #d7fff5;
-    outline: none;
-  }
-
-  button {
-    padding: 12px 16px;
-    font-size: 16px;
-    cursor: pointer;
-    border: 1px solid #00aa88;
-    background: #0c1b18;
-    color: #d7fff5;
-  }
-
-  button:hover {
-    background: #12302a;
-  }
-
-  .table {
-    display: inline-block;
-    text-align: left;
-    width: 100%;
-    max-width: 900px;
-    padding: 14px;
-    border: 1px solid rgba(0,255,180,0.22);
-    background: rgba(0, 0, 0, 0.5);
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: 70px 170px 1fr;
-    align-items: start;
-    gap: 10px;
-    margin: 7px 0;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(0,255,180,0.08);
-  }
-
-  .row:last-child {
-    border-bottom: none;
-  }
-
-  .total {
-    color: #ffd54a;
-    font-weight: bold;
-    text-align: right;
-    padding-right: 6px;
-  }
-
-  .name {
-    color: #7fffd4;
-    white-space: nowrap;
-  }
-
-  .values {
-    color: #e8fff8;
-    word-break: break-word;
-    letter-spacing: 2px;
-    line-height: 1.5;
-  }
-
-  @media (max-width: 700px) {
-    .row {
-      grid-template-columns: 60px 130px 1fr;
-      gap: 8px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amber’s Word Journal 🦋</title>
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    .name {
-      white-space: normal;
+    :root {
+      --bg: #000;
+      --panel: rgba(0, 0, 0, 0.60);
+      --line: rgba(0, 255, 180, 0.18);
+      --line-soft: rgba(0, 255, 180, 0.10);
+      --text: #eafff8;
+      --accent: #86ffe0;
+      --total: #ffd54a;
     }
 
-    .values {
-      letter-spacing: 1px;
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: monospace;
+      overflow-x: hidden;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      display: block;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 18px 40px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.48);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 2.1rem;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(0, 255, 170, 0.35);
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #caffef;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
     }
 
     input {
-      min-width: 220px;
+      padding: 12px;
+      font-size: 16px;
+      min-width: 260px;
+      border: 1px solid #00ccb0;
+      background: #05110f;
+      color: var(--text);
+      outline: none;
+      font-family: monospace;
+    }
+
+    button {
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      border: 1px solid #00ccb0;
+      background: #0b1a17;
+      color: var(--text);
+      font-family: monospace;
+    }
+
+    button:hover {
+      background: #12302a;
+    }
+
+    .table {
       width: 100%;
-      max-width: 340px;
-    }
-  }
-</style>
-</head>
-<body>
-
-<canvas id="matrix"></canvas>
-
-<div class="app">
-  <h1>Amber’s Word Journal 🦋</h1>
-  <p>Type a word and tap Generate</p>
-
-  <div class="controls">
-    <input id="word" placeholder="Enter word" />
-    <button onclick="calculate()">Generate</button>
-  </div>
-
-  <div id="output" class="table"></div>
-</div>
-
-<script>
-  const alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-  function cleanWord(word) {
-    return word.toLowerCase().replace(/[^a-z]/g, "");
-  }
-
-  function simple(word) {
-    return [...word].map(c => alphabet.indexOf(c) + 1);
-  }
-
-  function reverse(word) {
-    return [...word].map(c => 26 - alphabet.indexOf(c));
-  }
-
-  function english(word) {
-    return simple(word).map(n => n * 6);
-  }
-
-  function reverseReduced(word) {
-    return reverse(word).map(n => n % 9 || 9);
-  }
-
-  function pythagorean(word) {
-    return simple(word).map(n => n % 9 || 9);
-  }
-
-  const chaldeanMap = {
-    a:1,b:2,c:3,d:4,e:5,f:8,g:3,h:5,i:1,j:1,k:2,l:3,m:4,
-    n:5,o:7,p:8,q:1,r:2,s:3,t:4,u:6,v:6,w:6,x:5,y:1,z:7
-  };
-
-  function chaldean(word) {
-    return [...word].map(c => chaldeanMap[c] || 0);
-  }
-
-  const septenaryMap = {
-    a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:6,i:5,j:4,k:3,l:2,m:1,
-    n:1,o:2,p:3,q:4,r:5,s:6,t:7,u:6,v:5,w:4,x:3,y:2,z:1
-  };
-
-  function septenary(word) {
-    return [...word].map(c => septenaryMap[c] || 0);
-  }
-
-  function jewish(word) {
-    return [...word].map(c => {
-      const n = alphabet.indexOf(c) + 1;
-      if (n <= 9) return n;
-      if (n <= 18) return (n - 9) * 10;
-      return (n - 18) * 100;
-    });
-  }
-
-  function sum(arr) {
-    return arr.reduce((a, b) => a + b, 0);
-  }
-
-  function makeRow(name, values) {
-    return `
-      <div class="row">
-        <div class="total">${sum(values)}</div>
-        <div class="name">${name}</div>
-        <div class="values">${values.join(" ")}</div>
-      </div>
-    `;
-  }
-
-  function calculate() {
-    const word = cleanWord(document.getElementById("word").value);
-
-    if (!word) {
-      document.getElementById("output").innerHTML = "";
-      return;
+      max-width: 1080px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 8px 10px 12px;
     }
 
-    let html = "";
-    html += makeRow("Simφle", simple(word));
-    html += makeRow("Reverse", reverse(word));
-    html += makeRow("English", english(word));
-    html += makeRow("Jewish", jewish(word));
-    html += makeRow("Rev. Reduced", reverseReduced(word));
-    html += makeRow("Pythagorean", pythagorean(word));
-    html += makeRow("Chaldean", chaldean(word));
-    html += makeRow("Septenary", septenary(word));
+    .row {
+      display: grid;
+      grid-template-columns: 170px 1fr 80px;
+      align-items: center;
+      gap: 14px;
+      min-height: 56px;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line-soft);
+    }
 
-    document.getElementById("output").innerHTML = html;
-  }
+    .row:last-child {
+      border-bottom: none;
+    }
 
-  document.getElementById("word").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") calculate();
-  });
+    .name {
+      color: var(--accent);
+      text-align: left;
+      white-space: nowrap;
+      font-size: 1.05rem;
+      padding-left: 4px;
+    }
 
-  // Matrix rain
-  const canvas = document.getElementById("matrix");
-  const ctx = canvas.getContext("2d");
+    .values {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding: 6px 0;
+      scrollbar-width: thin;
+    }
 
-  let width, height, columns, drops;
-  const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    .value-box {
+      min-width: 42px;
+      height: 36px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0, 255, 180, 0.14);
+      background: rgba(0, 0, 0, 0.22);
+      color: var(--text);
+      font-size: 1.08rem;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
 
-  function resizeMatrix() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    columns = Math.floor(width / 20);
-    drops = Array(columns).fill(1);
-  }
+    .total {
+      color: var(--total);
+      font-weight: bold;
+      text-align: right;
+      white-space: nowrap;
+      font-size: 1.15rem;
+      padding-right: 6px;
+    }
 
-  function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = "#00ff66";
-    ctx.font = "16px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-      const text = chars[Math.floor(Math.random() * chars.length)];
-      ctx.fillText(text, i * 20, drops[i] * 20);
-
-      if (drops[i] * 20 > height && Math.random() > 0.975) {
-        drops[i] = 0;
+    @media (max-width: 860px) {
+      .row {
+        grid-template-columns: 130px 1fr 62px;
+        gap: 8px;
       }
 
-      drops[i]++;
+      .name {
+        font-size: 0.95rem;
+      }
+
+      .value-box {
+        min-width: 36px;
+        height: 32px;
+        font-size: 0.95rem;
+      }
+
+      .total {
+        font-size: 1rem;
+      }
     }
-  }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
 
-  resizeMatrix();
-  window.addEventListener("resize", resizeMatrix);
-  setInterval(drawMatrix, 50);
-</script>
+  <div class="app">
+    <h1>Amber’s Word Journal 🦋</h1>
+    <p>Type a word and tap Generate</p>
 
+    <div class="controls">
+      <input id="word" placeholder="Enter word" />
+      <button onclick="calculate()">Generate</button>
+    </div>
+
+    <div id="output" class="table"></div>
+  </div>
+
+  <script>
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    function cleanWord(word) {
+      return word.toLowerCase().replace(/[^a-z]/g, "");
+    }
+
+    function simple(word) {
+      return [...word].map(c => alphabet.indexOf(c) + 1);
+    }
+
+    function reverse(word) {
+      return [...word].map(c => 26 - alphabet.indexOf(c));
+    }
+
+    function english(word) {
+      return simple(word).map(n => n * 6);
+    }
+
+    function reverseReduced(word) {
+      return reverse(word).map(n => n % 9 || 9);
+    }
+
+    function pythagorean(word) {
+      return simple(word).map(n => n % 9 || 9);
+    }
+
+    const chaldeanMap = {
+      a:1,b:2,c:3,d:4,e:5,f:8,g:3,h:5,i:1,j:1,k:2,l:3,m:4,
+      n:5,o:7,p:8,q:1,r:2,s:3,t:4,u:6,v:6,w:6,x:5,y:1,z:7
+    };
+
+    function chaldean(word) {
+      return [...word].map(c => chaldeanMap[c] || 0);
+    }
+
+    const septenaryMap = {
+      a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:6,i:5,j:4,k:3,l:2,m:1,
+      n:1,o:2,p:3,q:4,r:5,s:6,t:7,u:6,v:5,w:4,x:3,y:2,z:1
+    };
+
+    function septenary(word) {
+      return [...word].map(c => septenaryMap[c] || 0);
+    }
+
+    function jewish(word) {
+      return [...word].map(c => {
+        const n = alphabet.indexOf(c) + 1;
+        if (n <= 9) return n;
+        if (n <= 18) return (n - 9) * 10;
+        return (n - 18) * 100;
+      });
+    }
+
+    function sum(arr) {
+      return arr.reduce((a, b) => a + b, 0);
+    }
+
+    function renderValueBoxes(values) {
+      return values.map(v => `<span class="value-box">${v}</span>`).join("");
+    }
+
+    function makeRow(name, values) {
+      return `
+        <div class="row">
+          <div class="name">${name}</div>
+          <div class="values">${renderValueBoxes(values)}</div>
+          <div class="total">${sum(values)}</div>
+        </div>
+      `;
+    }
+
+    function calculate() {
+      const word = cleanWord(document.getElementById("word").value);
+
+      if (!word) {
+        document.getElementById("output").innerHTML = "";
+        return;
+      }
+
+      let html = "";
+      html += makeRow("Simφle", simple(word));
+      html += makeRow("Reverse", reverse(word));
+      html += makeRow("English", english(word));
+      html += makeRow("Jewish", jewish(word));
+      html += makeRow("Rev. Reduced", reverseReduced(word));
+      html += makeRow("Pythagorean", pythagorean(word));
+      html += makeRow("Chaldean", chaldean(word));
+      html += makeRow("Septenary", septenary(word));
+
+      document.getElementById("output").innerHTML = html;
+    }
+
+    document.getElementById("word").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") calculate();
+    });
+
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    let width, height, columns, drops;
+    const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function resizeMatrix() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / 20);
+      drops = Array(columns).fill(1);
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#00ff66";
+      ctx.font = "16px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * 20, drops[i] * 20);
+
+        if (drops[i] * 20 > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    resizeMatrix();
+    window.addEventListener("resize", resizeMatrix);
+    setInterval(drawMatrix, 50);
+  </script>
 </body>
 </html>
+
+Then refresh with something like:
+
+?v=3
+
+After that, if you want, I can do the next pass and make it feel even more like your actual journal page.
