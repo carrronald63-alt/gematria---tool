@@ -10,177 +10,140 @@
       background: black;
       color: white;
       font-family: monospace;
-      overflow: hidden;
-    }
-
-    #matrix {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
       padding: 20px;
-      max-width: 900px;
-      margin: auto;
     }
 
     h1 {
       color: #00ffcc;
-      text-align: center;
       letter-spacing: 2px;
+      margin-bottom: 10px;
     }
 
-    .controls {
-      text-align: center;
+    p {
       margin-bottom: 20px;
     }
 
     input {
       padding: 10px;
       font-size: 18px;
-      width: 250px;
+      width: 240px;
       background: #111;
       color: white;
       border: 1px solid #00ffcc;
+      font-family: monospace;
     }
 
     button {
-      padding: 10px 15px;
+      padding: 10px 14px;
       font-size: 18px;
       background: #00ffcc;
+      color: black;
       border: none;
+      margin-left: 8px;
+      font-family: monospace;
       cursor: pointer;
-      margin-left: 10px;
+    }
+
+    #output {
+      margin-top: 24px;
+      width: 100%;
+      max-width: 1100px;
     }
 
     .row {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 160px 1fr 90px;
+      gap: 16px;
+      align-items: start;
       margin: 6px 0;
     }
 
     .label {
-      width: 140px;
       color: #9fffe9;
+      white-space: nowrap;
     }
 
     .sequence {
-      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .total {
-      width: 80px;
-      text-align: right;
       color: #00ffcc;
+      text-align: right;
+      white-space: nowrap;
       font-weight: bold;
     }
   </style>
 </head>
-
 <body>
 
-<canvas id="matrix"></canvas>
+  <h1>Amber’s Word Journal 🦋</h1>
+  <p>enter a word and reveal the numbers</p>
 
-<div class="container">
-
-<h1>Amber’s Word Journal 🦋</h1>
-
-<div class="controls">
-  <input id="word" placeholder="word">
+  <input id="word" placeholder="word" onkeydown="if(event.key==='Enter') generate()">
   <button onclick="generate()">Generate</button>
-</div>
 
-<div id="output"></div>
+  <div id="output"></div>
 
-</div>
+  <script>
+    const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
-<script>
-const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+    const ciphers = [
+      { name: "Simφle", values: alphabet.map((_, i) => i + 1) },
+      { name: "Reverse", values: alphabet.map((_, i) => 26 - i) },
+      { name: "English", values: alphabet.map((_, i) => (i + 1) * 6) },
+      { name: "Jewish", values: [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800] },
+      { name: "Rev. Reduced", values: alphabet.map((_, i) => ((26 - i) % 9) || 9) },
+      { name: "Pythagorean", values: alphabet.map((_, i) => (i % 9) + 1) },
+      { name: "Chaldean", values: [1,2,3,4,5,8,3,5,1,1,2,3,4,5,7,8,1,2,3,4,6,6,6,5,1,7] },
+      { name: "Septenary", values: [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1] }
+    ];
 
-const ciphers = [
-  {name:"Simφle",values:alphabet.map((_,i)=>i+1)},
-  {name:"Reverse",values:alphabet.map((_,i)=>26-i)},
-  {name:"English",values:alphabet.map((_,i)=>(i+1)*6)},
-  {name:"Jewish",values:[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800]},
-  {name:"Rev Reduced",values:alphabet.map((_,i)=>((26-i)%9)||9)},
-  {name:"Pythagorean",values:alphabet.map((_,i)=>(i%9)+1)},
-  {name:"Chaldean",values:[1,2,3,4,5,8,3,5,1,1,2,3,4,5,7,8,1,2,3,4,6,6,6,5,1,7]},
-  {name:"Septenary",values:[1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1]}
-];
-
-function generate(){
-  let word = document.getElementById("word").value.toLowerCase();
-  let output = document.getElementById("output");
-  output.innerHTML = "";
-
-  ciphers.forEach(cipher=>{
-    let total = 0;
-    let seq = [];
-
-    for(let char of word){
-      let i = char.charCodeAt(0) - 97;
-      if(i>=0 && i<26){
-        let val = cipher.values[i];
-        total += val;
-        seq.push(val);
-      }
+    function cleanWord(text) {
+      return text.toLowerCase().replace(/[^a-z]/g, "");
     }
 
-    let row = document.createElement("div");
-    row.className = "row";
+    function generate() {
+      const word = cleanWord(document.getElementById("word").value);
+      const output = document.getElementById("output");
+      output.innerHTML = "";
 
-    row.innerHTML =
-      "<div class='label'>"+cipher.name+"</div>"+
-      "<div class='sequence'>"+seq.join(" ")+"</div>"+
-      "<div class='total'>"+total+"</div>";
+      if (!word) return;
 
-    output.appendChild(row);
-  });
-}
+      ciphers.forEach(cipher => {
+        let total = 0;
+        let seq = [];
 
-/* MATRIX RAIN */
-  const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
+        for (let char of word) {
+          let i = char.charCodeAt(0) - 97;
+          if (i >= 0 && i < 26) {
+            let val = cipher.values[i];
+            total += val;
+            seq.push(val);
+          }
+        }
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
+        const row = document.createElement("div");
+        row.className = "row";
 
-window.addEventListener("resize", resize);
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = cipher.name;
 
-const letters = "01";
-const fontSize = 14;
-let columns = Math.floor(canvas.width / fontSize);
+        const sequence = document.createElement("div");
+        sequence.className = "sequence";
+        sequence.textContent = seq.join(" ");
 
-let drops = Array(columns).fill(1);
+        const totalDiv = document.createElement("div");
+        totalDiv.className = "total";
+        totalDiv.textContent = total;
 
-function draw() {
-  // DARKER TRAIL (this is key fix)
-  ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        row.appendChild(label);
+        row.appendChild(sequence);
+        row.appendChild(totalDiv);
 
-  ctx.fillStyle = "#00ff00"; // BRIGHT GREEN
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters[Math.floor(Math.random() * letters.length)];
-    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-    if (drops[i] * fontSize > canvas.height && Math.random() > 0.97) {
-      drops[i] = 0;
+        output.appendChild(row);
+      });
     }
-
-    drops[i]++;
-  }
-}
-
-setInterval(draw, 33);
-</script>
+  </script>
