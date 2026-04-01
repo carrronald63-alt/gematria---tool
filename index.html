@@ -8,11 +8,12 @@
 <style>
 :root{
   --bg:#020506;
-  --panel:rgba(0,0,0,0.62);
-  --line:rgba(0,255,150,0.18);
-  --soft:rgba(255,255,255,0.05);
+  --panel:rgba(0,0,0,0.70);
+  --line:rgba(0,255,150,0.20);
+  --soft:rgba(255,255,255,0.06);
   --soft2:rgba(255,255,255,0.035);
   --green:#00ff9c;
+  --green2:#00d084;
   --text:#ecfff5;
   --muted:#9cc7af;
   --total-bg:rgba(0,255,150,0.18);
@@ -20,54 +21,65 @@
 
 *{box-sizing:border-box}
 
-body{
+html,body{
   margin:0;
+  min-height:100%;
   background:var(--bg);
   color:var(--text);
   font-family:Arial, sans-serif;
   overflow-x:hidden;
 }
 
+body{
+  position:relative;
+}
+
 #matrix{
   position:fixed;
   inset:0;
   z-index:0;
+  display:block;
 }
 
 .app{
   position:relative;
   z-index:2;
   max-width:920px;
-  margin:20px auto;
+  margin:24px auto;
   padding:18px;
   background:var(--panel);
   border:1px solid var(--line);
-  border-radius:16px;
-  backdrop-filter:blur(2px);
+  border-radius:18px;
+  box-shadow:0 0 30px rgba(0,255,150,0.08);
+  backdrop-filter:blur(3px);
+}
+
+.title-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:4px 0 0;
 }
 
 h1{
   margin:0;
   text-align:center;
   color:var(--green);
-  font-size:clamp(26px,4vw,36px);
+  font-size:clamp(28px,4vw,36px);
   line-height:1.1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-h1 span {
-  margin-left: 10px;
-  font-size: 1.2em;
-  color: #ecfff5;
-  font-weight: bold;
+.butterfly{
+  font-size:clamp(28px,4vw,36px);
+  line-height:1;
+  filter:drop-shadow(0 0 8px rgba(0,255,150,0.22));
 }
 
 .sub{
-  margin:8px 0 14px;
   text-align:center;
   color:var(--muted);
+  margin:10px 0 16px;
   font-size:14px;
 }
 
@@ -80,33 +92,38 @@ h1 span {
 input{
   flex:1;
   min-width:0;
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid rgba(0,255,150,0.28);
-  background:#000;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid rgba(0,255,150,0.34);
+  background:rgba(0,0,0,0.78);
   color:#fff;
   outline:none;
-  font-size:16px;
+  font-size:18px;
 }
 
 input::placeholder{
-  color:#8bb7a0;
+  color:#86b89f;
 }
 
 button{
-  padding:12px 16px;
-  border-radius:10px;
-  border:1px solid rgba(0,255,150,0.30);
-  background:rgba(0,255,150,0.10);
+  padding:14px 18px;
+  border-radius:12px;
+  border:1px solid rgba(0,255,150,0.34);
+  background:rgba(0,255,150,0.09);
   color:var(--green);
   font-weight:700;
+  font-size:16px;
   cursor:pointer;
   white-space:nowrap;
 }
 
+button:hover{
+  background:rgba(0,255,150,0.14);
+}
+
 .results{
   display:none;
-  margin-top:14px;
+  margin-top:16px;
 }
 
 .results.show{
@@ -116,56 +133,58 @@ button{
 .row{
   margin-bottom:8px;
   padding:8px;
-  border-radius:12px;
+  border-radius:14px;
   background:var(--soft2);
   border:1px solid rgba(255,255,255,0.03);
 }
 
 .row-inner{
   display:grid;
-  grid-template-columns:96px 1fr 64px;
+  grid-template-columns:84px minmax(0,1fr);
   align-items:center;
-  gap:8px;
+  gap:6px;
 }
 
 .name{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  height:40px;
-  padding:0 8px;
-  border-radius:8px;
+  height:42px;
+  padding:0 10px;
+  border-radius:10px;
   background:rgba(0,255,150,0.10);
   color:var(--green);
-  font-size:12px;
+  font-size:14px;
   font-weight:700;
   letter-spacing:0.2px;
-  overflow:hidden;
   white-space:nowrap;
+  overflow:hidden;
 }
 
 .seq-wrap{
   overflow-x:auto;
   overflow-y:hidden;
   scrollbar-width:thin;
+  padding-bottom:2px;
 }
 
 .seq{
   display:grid;
   grid-auto-flow:column;
-  grid-auto-columns:48px;
+  grid-auto-columns:56px;
   gap:6px;
   width:max-content;
 }
 
 .box,
 .total{
-  height:40px;
+  width:56px;
+  height:42px;
   display:flex;
   align-items:center;
   justify-content:center;
-  border-radius:9px;
-  font-size:15px;
+  border-radius:10px;
+  font-size:18px;
   font-variant-numeric:tabular-nums;
   line-height:1;
 }
@@ -179,53 +198,6 @@ button{
   background:var(--total-bg);
   color:#dffff0;
   font-weight:700;
-  justify-self:end;
-  margin-left:4px;
-}
-
-.matrix-box{
-  display:none;
-  margin-top:14px;
-  padding:10px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:rgba(0,0,0,0.22);
-}
-
-.matrix-box.show{
-  display:block;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:8px;
-}
-
-.card{
-  text-align:center;
-  padding:10px 8px;
-  border-radius:10px;
-  background:var(--soft);
-  min-width:0;
-}
-
-.card-name{
-  display:block;
-  color:#d6fff0;
-  font-size:13px;
-  margin-bottom:6px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.card-total{
-  display:block;
-  color:var(--green);
-  font-size:18px;
-  font-weight:700;
-  font-variant-numeric:tabular-nums;
 }
 
 @media (max-width:700px){
@@ -244,64 +216,26 @@ button{
   }
 
   .row-inner{
-    grid-template-columns:78px 1fr 58px;
-    gap:6px;
+    grid-template-columns:72px minmax(0,1fr);
+    gap:5px;
   }
 
   .name{
-    font-size:11px;
-    padding:0 6px;
+    height:38px;
+    padding:0 8px;
+    font-size:13px;
   }
 
   .seq{
-    grid-auto-columns:42px;
+    grid-auto-columns:50px;
     gap:5px;
   }
 
   .box,
   .total{
-    height:36px;
-    font-size:14px;
-  }
-
-  .total{
-    width:58px;
-  }
-
-  .grid{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-
-  .card-name{
-    font-size:12px;
-  }
-
-  .card-total{
+    width:50px;
+    height:38px;
     font-size:16px;
-  }
-}
-
-/* Butterfly effect */
-.butterfly-icon {
-  font-size: 2em;
-  color: var(--green);
-  display: inline-block;
-  animation: pulse 1.5s infinite;
-  margin-left: 10px;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
   }
 }
 </style>
@@ -311,21 +245,190 @@ button{
 <canvas id="matrix"></canvas>
 
 <div class="app">
-  <h1>Amber's Word Journal
-    <span class="butterfly-icon">🦋</span>
-  </h1>
+  <div class="title-row">
+    <h1>Amber's Word Journal</h1>
+    <div class="butterfly">🦋</div>
+  </div>
+
   <p class="sub">Type a word and tap Generate</p>
 
   <div class="controls">
     <input id="word" type="text" placeholder="Enter word" />
-    <button onclick="run()">Generate</button>
+    <button id="generateBtn" type="button">Generate</button>
   </div>
 
   <div id="results" class="results"></div>
 </div>
 
 <script>
-// Your original script goes here (same as before)
+const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function mapSimple(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = i + 1;
+  return m;
+}
+
+function mapReverse(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = 26 - i;
+  return m;
+}
+
+function mapEnglish(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = (i + 1) * 6;
+  return m;
+}
+
+function mapReduced(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = (i % 9) + 1;
+  return m;
+}
+
+function mapRevReduced(){
+  const m = {};
+  for(let i = 0; i < 26; i++){
+    const r = 26 - i;
+    m[A[i]] = ((r - 1) % 9) + 1;
+  }
+  return m;
+}
+
+const jewish = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800];
+function mapJwsh(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = jewish[i];
+  return m;
+}
+
+const chald = {
+  A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
+  N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
+};
+
+const sept = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
+function mapSept(){
+  const m = {};
+  for(let i = 0; i < 26; i++) m[A[i]] = sept[i];
+  return m;
+}
+
+const ciphers = [
+  ["simφ", mapSimple()],
+  ["rev", mapReverse()],
+  ["eng", mapEnglish()],
+  ["jwsh", mapJwsh()],
+  ["r.r.", mapRevReduced()],
+  ["φyth", mapReduced()],
+  ["chdn", chald],
+  ["seφt", mapSept()]
+];
+
+function cleanText(text){
+  return text.toUpperCase().replace(/[^A-Z]/g, "");
+}
+
+function renderResults(word){
+  const results = document.getElementById("results");
+
+  if(!word){
+    results.innerHTML = "";
+    results.classList.remove("show");
+    return;
+  }
+
+  let html = "";
+
+  ciphers.forEach(([name, map]) => {
+    const seq = [...word].map(ch => map[ch] || 0);
+    const total = seq.reduce((sum, n) => sum + n, 0);
+
+    html += `
+      <div class="row">
+        <div class="row-inner">
+          <div class="name">${name}</div>
+          <div class="seq-wrap">
+            <div class="seq">
+              ${seq.map(n => `<div class="box">${n}</div>`).join("")}
+              <div class="total">${total}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  results.innerHTML = html;
+  results.classList.add("show");
+}
+
+function run(){
+  const input = document.getElementById("word");
+  const word = cleanText(input.value);
+  renderResults(word);
+}
+
+document.getElementById("generateBtn").addEventListener("click", run);
+document.getElementById("word").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") run();
+});
+
+/* PRETTY MATRIX */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+let width = 0;
+let height = 0;
+let fontSize = 18;
+let columns = 0;
+let drops = [];
+let speeds = [];
+const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function resizeMatrix(){
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  fontSize = window.innerWidth < 700 ? 14 : 18;
+  columns = Math.floor(width / fontSize);
+  drops = Array.from({length: columns}, () => Math.random() * height / fontSize);
+  speeds = Array.from({length: columns}, () => 0.6 + Math.random() * 1.4);
+}
+
+function drawMatrix(){
+  ctx.fillStyle = "rgba(2,5,6,0.12)";
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.font = fontSize + "px monospace";
+
+  for(let i = 0; i < columns; i++){
+    const char = chars[Math.floor(Math.random() * chars.length)];
+    const x = i * fontSize;
+    const y = drops[i] * fontSize;
+
+    ctx.fillStyle = "rgba(0,255,156,0.16)";
+    ctx.fillText(char, x, y);
+
+    ctx.fillStyle = "rgba(120,255,210,0.85)";
+    ctx.fillText(char, x, y - fontSize);
+
+    ctx.fillStyle = "rgba(220,255,240,0.95)";
+    ctx.fillText(char, x, y - (fontSize * 2));
+
+    drops[i] += speeds[i] * 0.35;
+
+    if (y > height + Math.random() * 400) {
+      drops[i] = -Math.random() * 40;
+      speeds[i] = 0.6 + Math.random() * 1.4;
+    }
+  }
+}
+
+resizeMatrix();
+setInterval(drawMatrix, 50);
+window.addEventListener("resize", resizeMatrix);
 </script>
+
 </body>
 </html>
