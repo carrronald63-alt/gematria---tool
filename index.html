@@ -1,158 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amber’s Word Journal</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      font-family: monospace;
-      padding: 20px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amber’s Word Journal 🦋</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: #000;
+    color: #00ffcc;
+    font-family: monospace;
+    overflow-x: hidden;
+  }
+
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    display: block;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    font-size: 2rem;
+    color: #7fffd4;
+    text-shadow: 0 0 8px rgba(0,255,170,0.35);
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: #b8ffe9;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+  input {
+    padding: 12px;
+    font-size: 16px;
+    min-width: 260px;
+    border: 1px solid #00aa88;
+    background: #07110f;
+    color: #d7fff5;
+    outline: none;
+  }
+
+  button {
+    padding: 12px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #00aa88;
+    background: #0c1b18;
+    color: #d7fff5;
+  }
+
+  button:hover {
+    background: #12302a;
+  }
+
+  .table {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+    max-width: 900px;
+    padding: 14px;
+    border: 1px solid rgba(0,255,180,0.22);
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 70px 170px 1fr;
+    align-items: start;
+    gap: 10px;
+    margin: 7px 0;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0,255,180,0.08);
+  }
+
+  .row:last-child {
+    border-bottom: none;
+  }
+
+  .total {
+    color: #ffd54a;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 6px;
+  }
+
+  .name {
+    color: #7fffd4;
+    white-space: nowrap;
+  }
+
+  .values {
+    color: #e8fff8;
+    word-break: break-word;
+    letter-spacing: 2px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 700px) {
+    .row {
+      grid-template-columns: 60px 130px 1fr;
+      gap: 8px;
     }
 
-    h1 {
-      color: #00ffcc;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-bottom: 10px;
+    .name {
+      white-space: normal;
     }
 
-    p {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #bbb;
-    }
-
-    .controls {
-      text-align: center;
-      margin-bottom: 24px;
+    .values {
+      letter-spacing: 1px;
     }
 
     input {
-      padding: 10px;
-      font-size: 18px;
-      width: 240px;
-      background: #111;
-      color: white;
-      border: 1px solid #00ffcc;
-      font-family: monospace;
+      min-width: 220px;
+      width: 100%;
+      max-width: 340px;
     }
-
-    button {
-      padding: 10px 14px;
-      font-size: 18px;
-      background: #00ffcc;
-      color: black;
-      border: none;
-      margin-left: 8px;
-      font-family: monospace;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #output {
-      margin: 24px auto 0;
-      max-width: 1100px;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 170px 1fr 90px;
-      gap: 16px;
-      align-items: start;
-      margin: 8px 0;
-      padding: 10px 12px;
-      border: 1px solid #1f1f1f;
-      background: #0a0a0a;
-    }
-
-    .label {
-      color: #00ffcc;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .sequence {
-      color: white;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .total {
-      color: #ffcc00;
-      text-align: right;
-      white-space: nowrap;
-      font-weight: bold;
-      font-size: 20px;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
+<canvas id="matrix"></canvas>
+
+<div class="app">
   <h1>Amber’s Word Journal 🦋</h1>
-  <p>type a word and tap Generate</p>
+  <p>Type a word and tap Generate</p>
 
   <div class="controls">
-    <input id="word" placeholder="word" onkeydown="if(event.key==='Enter') generate()">
-    <button onclick="generate()">Generate</button>
+    <input id="word" placeholder="Enter word" />
+    <button onclick="calculate()">Generate</button>
   </div>
 
-  <div id="output"></div>
+  <div id="output" class="table"></div>
+</div>
 
-  <script>
-    const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+<script>
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-    const ciphers = [
-      { name: "Simφle", values: alphabet.map((_, i) => i + 1) },
-      { name: "Reverse", values: alphabet.map((_, i) => 26 - i) },
-      { name: "English", values: alphabet.map((_, i) => (i + 1) * 6) },
-      { name: "Jewish", values: [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800] },
-      { name: "Rev. Reduced", values: alphabet.map((_, i) => ((26 - i) % 9) || 9) },
-      { name: "Pythagorean", values: alphabet.map((_, i) => (i % 9) + 1) },
-      { name: "Chaldean", values: [1,2,3,4,5,8,3,5,1,1,2,3,4,5,7,8,1,2,3,4,6,6,6,5,1,7] },
-      { name: "Septenary", values: [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1] }
-    ];
+  function cleanWord(word) {
+    return word.toLowerCase().replace(/[^a-z]/g, "");
+  }
 
-    function cleanWord(text) {
-      return text.toLowerCase().replace(/[^a-z]/g, "");
+  function simple(word) {
+    return [...word].map(c => alphabet.indexOf(c) + 1);
+  }
+
+  function reverse(word) {
+    return [...word].map(c => 26 - alphabet.indexOf(c));
+  }
+
+  function english(word) {
+    return simple(word).map(n => n * 6);
+  }
+
+  function reverseReduced(word) {
+    return reverse(word).map(n => n % 9 || 9);
+  }
+
+  function pythagorean(word) {
+    return simple(word).map(n => n % 9 || 9);
+  }
+
+  const chaldeanMap = {
+    a:1,b:2,c:3,d:4,e:5,f:8,g:3,h:5,i:1,j:1,k:2,l:3,m:4,
+    n:5,o:7,p:8,q:1,r:2,s:3,t:4,u:6,v:6,w:6,x:5,y:1,z:7
+  };
+
+  function chaldean(word) {
+    return [...word].map(c => chaldeanMap[c] || 0);
+  }
+
+  const septenaryMap = {
+    a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:6,i:5,j:4,k:3,l:2,m:1,
+    n:1,o:2,p:3,q:4,r:5,s:6,t:7,u:6,v:5,w:4,x:3,y:2,z:1
+  };
+
+  function septenary(word) {
+    return [...word].map(c => septenaryMap[c] || 0);
+  }
+
+  function jewish(word) {
+    return [...word].map(c => {
+      const n = alphabet.indexOf(c) + 1;
+      if (n <= 9) return n;
+      if (n <= 18) return (n - 9) * 10;
+      return (n - 18) * 100;
+    });
+  }
+
+  function sum(arr) {
+    return arr.reduce((a, b) => a + b, 0);
+  }
+
+  function makeRow(name, values) {
+    return `
+      <div class="row">
+        <div class="total">${sum(values)}</div>
+        <div class="name">${name}</div>
+        <div class="values">${values.join(" ")}</div>
+      </div>
+    `;
+  }
+
+  function calculate() {
+    const word = cleanWord(document.getElementById("word").value);
+
+    if (!word) {
+      document.getElementById("output").innerHTML = "";
+      return;
     }
 
-    function generate() {
-      const word = cleanWord(document.getElementById("word").value);
-      const output = document.getElementById("output");
-      output.innerHTML = "";
+    let html = "";
+    html += makeRow("Simφle", simple(word));
+    html += makeRow("Reverse", reverse(word));
+    html += makeRow("English", english(word));
+    html += makeRow("Jewish", jewish(word));
+    html += makeRow("Rev. Reduced", reverseReduced(word));
+    html += makeRow("Pythagorean", pythagorean(word));
+    html += makeRow("Chaldean", chaldean(word));
+    html += makeRow("Septenary", septenary(word));
 
-      if (!word) return;
+    document.getElementById("output").innerHTML = html;
+  }
 
-      ciphers.forEach(cipher => {
-        let total = 0;
-        let seq = [];
+  document.getElementById("word").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") calculate();
+  });
 
-        for (let char of word) {
-          let i = char.charCodeAt(0) - 97;
-          if (i >= 0 && i < 26) {
-            let val = cipher.values[i];
-            total += val;
-            seq.push(val);
-          }
-        }
+  // Matrix rain
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
 
-        const row = document.createElement("div");
-        row.className = "row";
+  let width, height, columns, drops;
+  const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        row.innerHTML = `
-          <div class="label">${cipher.name}</div>
-          <div class="sequence">${seq.join(" ")}</div>
-          <div class="total">${total}</div>
-        `;
+  function resizeMatrix() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    columns = Math.floor(width / 20);
+    drops = Array(columns).fill(1);
+  }
 
-        output.appendChild(row);
-      });
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = "#00ff66";
+    ctx.font = "16px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * 20, drops[i] * 20);
+
+      if (drops[i] * 20 > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+
+      drops[i]++;
     }
-  </script>
+  }
+
+  resizeMatrix();
+  window.addEventListener("resize", resizeMatrix);
+  setInterval(drawMatrix, 50);
+</script>
 
 </body>
 </html>
