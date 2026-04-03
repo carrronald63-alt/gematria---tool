@@ -1,475 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amber's Word Journal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dots Gematria Checker</title>
 
-  <style>
-    :root{
-      --bg:#020506;
-      --panel:rgba(0,0,0,0.72);
-      --line:rgba(0,255,150,0.18);
-      --soft:rgba(255,255,255,0.06);
-      --soft2:rgba(255,255,255,0.035);
-      --green:#00ff9c;
-      --text:#ecfff5;
-      --muted:#9cc7af;
-      --total-bg:rgba(0,255,150,0.18);
-    }
+<style>
+body {
+  margin: 0;
+  background: #020506;
+  color: #ecfff5;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
 
-    *{ box-sizing:border-box; }
+#matrix {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+}
 
-    html, body{
-      margin:0;
-      min-height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Arial, sans-serif;
-      overflow-x:hidden;
-    }
+.app {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 18px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(0,255,150,0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
 
-    body{
-      position:relative;
-    }
+h1 {
+  text-align: center;
+  color: #00ff9c;
+  margin: 0;
+}
 
-    #matrix{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      display:block;
-    }
+.sub {
+  text-align: center;
+  color: #9cc7af;
+  margin-bottom: 14px;
+}
 
-    .app{
-      position:relative;
-      z-index:2;
-      max-width:920px;
-      margin:24px auto;
-      padding:18px;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:18px;
-      box-shadow:0 0 30px rgba(0,255,150,0.08);
-      backdrop-filter:blur(3px);
-    }
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
-    .title-row{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      margin:2px 0 0;
-    }
+input {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,150,0.3);
+  background: #000;
+  color: #fff;
+}
 
-    h1{
-      margin:0;
-      text-align:center;
-      color:var(--green);
-      font-size:clamp(28px,4vw,36px);
-      line-height:1.1;
-    }
+button {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,150,0.3);
+  background: rgba(0,255,150,0.1);
+  color: #00ff9c;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .butterfly{
-      font-size:clamp(26px,4vw,34px);
-      line-height:1;
-      filter:drop-shadow(0 0 8px rgba(0,255,150,0.22));
-    }
+.results {
+  display: none;
+  margin-top: 12px;
+}
 
-    .sub{
-      text-align:center;
-      color:var(--muted);
-      margin:10px 0 16px;
-      font-size:14px;
-    }
+.results.show {
+  display: block;
+}
 
-    .controls{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+.row {
+  margin-bottom: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
 
-    input{
-      flex:1;
-      min-width:0;
-      padding:14px 16px;
-      border-radius:12px;
-      border:1px solid rgba(0,255,150,0.34);
-      background:rgba(0,0,0,0.78);
-      color:#fff;
-      outline:none;
-      font-size:18px;
-    }
+.strip {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
-    input::placeholder{
-      color:#86b89f;
-    }
+.line {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  min-width: max-content;
+}
 
-    button{
-      padding:14px 18px;
-      border-radius:12px;
-      border:1px solid rgba(0,255,150,0.34);
-      background:rgba(0,255,150,0.09);
-      color:var(--green);
-      font-weight:700;
-      font-size:16px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
+.name {
+  padding: 4px 6px;
+  background: rgba(0,255,150,0.1);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #00ff9c;
+  white-space: nowrap;
+}
 
-    button:hover{
-      background:rgba(0,255,150,0.14);
-    }
+.box {
+  min-width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
 
-    .results{
-      display:none;
-      margin-top:16px;
-    }
+.total {
+  background: rgba(0,255,150,0.2);
+  color: #00ff9c;
+  font-weight: bold;
+}
 
-    .results.show{
-      display:block;
-    }
+.matrixTotals {
+  display: none;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid rgba(0,255,150,0.2);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
 
-    /* One shared scroll area only */
-    .results-scroll{
-      overflow-x:auto;
-      overflow-y:hidden;
-      scrollbar-width:thin;
-      padding-bottom:4px;
-    }
+.matrixTotals.show {
+  display: block;
+}
 
-    .results-inner{
-      width:max-content;
-      min-width:100%;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+}
 
-    .row{
-      margin-bottom:8px;
-      padding:8px;
-      border-radius:14px;
-      background:var(--soft2);
-      border:1px solid rgba(255,255,255,0.03);
-    }
+.card {
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+}
 
-    .row:last-child{
-      margin-bottom:0;
-    }
+.card span {
+  display: block;
+}
 
-    .row-inner{
-      display:grid;
-      grid-template-columns:72px auto;
-      align-items:center;
-      gap:6px;
-      width:max-content;
-    }
+@media (max-width: 640px) {
+  .controls {
+    flex-direction: column;
+  }
 
-    .name{
-      width:72px;
-      height:36px;
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      padding:0 8px;
-      border-radius:10px;
-      background:rgba(0,255,150,0.10);
-      color:var(--green);
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:0.2px;
-      white-space:nowrap;
-      overflow:hidden;
-    }
+  button, input {
+    width: 100%;
+  }
 
-    .seq{
-      display:grid;
-      grid-auto-flow:column;
-      grid-auto-columns:42px;
-      gap:4px;
-      width:max-content;
-    }
-
-    .box,
-    .total,
-    .pad{
-      width:42px;
-      height:36px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:10px;
-      font-size:15px;
-      font-variant-numeric:tabular-nums;
-      line-height:1;
-    }
-
-    .box{
-      background:var(--soft);
-      color:var(--text);
-    }
-
-    .total{
-      background:var(--total-bg);
-      color:#dffff0;
-      font-weight:700;
-    }
-
-    .pad{
-      visibility:hidden;
-      background:transparent;
-    }
-
-    @media (min-width:701px){
-      .row-inner{
-        grid-template-columns:76px auto;
-      }
-
-      .name{
-        width:76px;
-        height:38px;
-        padding:0 10px;
-        font-size:14px;
-      }
-
-      .seq{
-        grid-auto-columns:46px;
-        gap:5px;
-      }
-
-      .box,
-      .total,
-      .pad{
-        width:46px;
-        height:38px;
-        font-size:17px;
-      }
-    }
-
-    @media (max-width:700px){
-      .app{
-        margin:10px;
-        padding:14px;
-      }
-
-      .controls{
-        flex-direction:column;
-        align-items:stretch;
-      }
-
-      button{
-        width:100%;
-      }
-    }
-  </style>
+  .grid {
+    grid-template-columns: repeat(2,1fr);
+  }
+}
+</style>
 </head>
+
 <body>
 
-  <canvas id="matrix"></canvas>
+<canvas id="matrix"></canvas>
 
-  <div class="app">
-    <div class="title-row">
-      <h1>Amber's Word Journal</h1>
-      <div class="butterfly">🦋</div>
-    </div>
+<div class="app">
+  <h1>Dots Gematria Checker</h1>
+  <p class="sub">Type a word and tap Generate</p>
 
-    <p class="sub">Type a word and tap Generate</p>
-
-    <div class="controls">
-      <input id="word" type="text" placeholder="Enter word" />
-      <button id="generateBtn" type="button">Generate</button>
-    </div>
-
-    <div id="results" class="results"></div>
+  <div class="controls">
+    <input id="word" placeholder="Enter word or phrase">
+    <button onclick="run()">Generate</button>
   </div>
 
-  <script>
-    const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  <div id="results" class="results"></div>
 
-    function mapSimple(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = i + 1;
-      return m;
+  <div id="matrixTotals" class="matrixTotals">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<script>
+const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function mapSimple() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = i + 1;
+  return m;
+}
+
+function mapReverse() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = 26 - i;
+  return m;
+}
+
+function mapEnglish() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = (i + 1) * 6;
+  return m;
+}
+
+function mapReduced() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = (i % 9) + 1;
+  return m;
+}
+
+function mapRevReduced() {
+  let m = {};
+  for (let i = 0; i < 26; i++) {
+    let r = 26 - i;
+    m[A[i]] = ((r - 1) % 9) + 1;
+  }
+  return m;
+}
+
+/* YOUR JWSH */
+const jewish = [1,2,3,4,5,6,7,8,9,600,10,20,30,40,50,60,70,80,90,100,200,700,900,300,400,500];
+function mapJewish() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = jewish[i];
+  return m;
+}
+
+const chald = {
+  A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
+  N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
+};
+
+const sept = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
+function mapSept() {
+  let m = {};
+  for (let i = 0; i < 26; i++) m[A[i]] = sept[i];
+  return m;
+}
+
+const ciphers = [
+  ["Simpφle", mapSimple()],
+  ["Reverse", mapReverse()],
+  ["English", mapEnglish()],
+  ["Jwsh", mapJewish()],
+  ["Rev Red", mapRevReduced()],
+  ["Pythφ", mapReduced()],
+  ["Chaldean", chald],
+  ["Seφt", mapSept()]
+];
+
+function clean(t) {
+  return t.toUpperCase().replace(/[^A-Z]/g, "");
+}
+
+function run() {
+  let w = clean(document.getElementById("word").value);
+  if (!w) return;
+
+  let res = "";
+  let grid = "";
+
+  ciphers.forEach(c => {
+    let seq = [...w].map(l => c[1][l] || 0);
+    let total = seq.reduce((a,b) => a + b, 0);
+
+    res += `<div class="row"><div class="strip"><div class="line">
+      <span class="name">${c[0]}</span>
+      ${seq.map(n => `<span class="box">${n}</span>`).join("")}
+      <span class="box total">${total}</span>
+    </div></div></div>`;
+
+    grid += `<div class="card"><span>${c[0]}</span><span>${total}</span></div>`;
+  });
+
+  document.getElementById("results").innerHTML = res;
+  document.getElementById("grid").innerHTML = grid;
+  document.getElementById("results").classList.add("show");
+  document.getElementById("matrixTotals").classList.add("show");
+}
+
+document.getElementById("word").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") run();
+});
+
+/* MATRIX BACKGROUND */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+let w, h, cols, drops;
+const font = 16;
+const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function setupMatrix() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+  cols = Math.floor(w / font);
+  drops = Array(cols).fill(1);
+}
+
+function drawMatrix() {
+  ctx.fillStyle = "rgba(0,0,0,0.04)";
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = "#00ff9c";
+  ctx.font = font + "px monospace";
+
+  for (let i = 0; i < drops.length; i++) {
+    const t = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(t, i * font, drops[i] * font);
+
+    if (drops[i] * font > h && Math.random() > 0.975) {
+      drops[i] = 0;
     }
+    drops[i]++;
+  }
+}
 
-    function mapReverse(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = 26 - i;
-      return m;
-    }
+setupMatrix();
+setInterval(drawMatrix, 50);
+window.addEventListener("resize", setupMatrix);
+</script>
 
-    function mapEnglish(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = (i + 1) * 6;
-      return m;
-    }
-
-    function mapReduced(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = (i % 9) + 1;
-      return m;
-    }
-
-    function mapRevReduced(){
-      const m = {};
-      for(let i = 0; i < 26; i++){
-        const r = 26 - i;
-        m[A[i]] = ((r - 1) % 9) + 1;
-      }
-      return m;
-    }
-
-    const jewish = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800];
-    function mapJwsh(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = jewish[i];
-      return m;
-    }
-
-    const chald = {
-      A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
-      N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
-    };
-
-    const sept = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
-    function mapSept(){
-      const m = {};
-      for(let i = 0; i < 26; i++) m[A[i]] = sept[i];
-      return m;
-    }
-
-    const ciphers = [
-      ["simφ", mapSimple()],
-      ["rev", mapReverse()],
-      ["eng", mapEnglish()],
-      ["jwsh", mapJwsh()],
-      ["r.r.", mapRevReduced()],
-      ["φyth", mapReduced()],
-      ["chdn", chald],
-      ["seφt", mapSept()]
-    ];
-
-    function cleanText(text){
-      return text
-        .toUpperCase()
-        .replace(/[^A-Z ]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function buildRow(name, seq, total, sharedLen){
-      let cells = seq.map(n => `<div class="box">${n}</div>`);
-      cells.push(`<div class="total">${total}</div>`);
-
-      while(cells.length < sharedLen){
-        cells.push(`<div class="pad"></div>`);
-      }
-
-      return `
-        <div class="row">
-          <div class="row-inner">
-            <div class="name">${name}</div>
-            <div class="seq">
-              ${cells.join("")}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderResults(word){
-      const results = document.getElementById("results");
-
-      if(!word){
-        results.innerHTML = "";
-        results.classList.remove("show");
-        return;
-      }
-
-      const letters = [...word].filter(ch => ch !== " ");
-      const sharedLen = letters.length + 1; // total box included
-
-      let rows = "";
-
-      for(const [name, map] of ciphers){
-        const seq = letters.map(ch => map[ch] || 0);
-        const total = seq.reduce((sum, n) => sum + n, 0);
-        rows += buildRow(name, seq, total, sharedLen);
-      }
-
-      results.innerHTML = `
-        <div class="results-scroll">
-          <div class="results-inner">
-            ${rows}
-          </div>
-        </div>
-      `;
-
-      results.classList.add("show");
-    }
-
-    function run(){
-      const input = document.getElementById("word");
-      const word = cleanText(input.value);
-      renderResults(word);
-    }
-
-    document.getElementById("generateBtn").addEventListener("click", run);
-    document.getElementById("word").addEventListener("keydown", (e) => {
-      if(e.key === "Enter") run();
-    });
-
-    /* Matrix */
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-
-    let width = 0;
-    let height = 0;
-    let fontSize = 18;
-    let columns = 0;
-    let drops = [];
-    let speeds = [];
-    const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    function resizeMatrix(){
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      fontSize = window.innerWidth < 700 ? 14 : 18;
-      columns = Math.floor(width / fontSize);
-      drops = Array.from({length: columns}, () => Math.random() * height / fontSize);
-      speeds = Array.from({length: columns}, () => 0.6 + Math.random() * 1.4);
-    }
-
-    function drawMatrix(){
-      ctx.fillStyle = "rgba(2,5,6,0.12)";
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.font = fontSize + "px monospace";
-
-      for(let i = 0; i < columns; i++){
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
-
-        ctx.fillStyle = "rgba(0,255,156,0.16)";
-        ctx.fillText(char, x, y);
-
-        ctx.fillStyle = "rgba(120,255,210,0.85)";
-        ctx.fillText(char, x, y - fontSize);
-
-        ctx.fillStyle = "rgba(220,255,240,0.95)";
-        ctx.fillText(char, x, y - (fontSize * 2));
-
-        drops[i] += speeds[i] * 0.35;
-
-        if (y > height + Math.random() * 400) {
-          drops[i] = -Math.random() * 40;
-          speeds[i] = 0.6 + Math.random() * 1.4;
-        }
-      }
-    }
-
-    resizeMatrix();
-    setInterval(drawMatrix, 50);
-    window.addEventListener("resize", resizeMatrix);
-  </script>
 </body>
 </html>
-    
