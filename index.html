@@ -1,339 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dots Gematria Checker</title>
-
-<style>
-body {
-  margin: 0;
-  background: #020506;
-  color: #ecfff5;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
-}
-
-#matrix {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  display: block;
-}
-
-.app {
-  position: relative;
-  z-index: 2;
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 18px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(0,255,150,0.2);
-  border-radius: 16px;
-  backdrop-filter: blur(4px);
-}
-
-h1 {
-  text-align: center;
-  color: #00ff9c;
-  margin: 0;
-}
-
-.sub {
-  text-align: center;
-  color: #9cc7af;
-  margin-bottom: 14px;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-input {
-  flex: 1;
-  min-width: 220px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,255,150,0.3);
-  background: #000;
-  color: #fff;
-}
-
-button {
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,255,150,0.3);
-  background: rgba(0,255,150,0.1);
-  color: #00ff9c;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.results {
-  display: none;
-  margin-top: 12px;
-}
-
-.results.show {
-  display: block;
-}
-
-.scrollbox {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 4px;
-}
-
-.inner {
-  min-width: max-content;
-}
-
-.row {
-  margin-bottom: 6px;
-  padding: 6px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-}
-
-.line {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-  min-width: max-content;
-  white-space: nowrap;
-}
-
-.name {
-  padding: 4px 6px;
-  background: rgba(0,255,150,0.1);
-  border-radius: 6px;
-  font-size: 12px;
-  color: #00ff9c;
-  white-space: nowrap;
-}
-
-.box {
-  min-width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-}
-
-.total {
-  background: rgba(0,255,150,0.2);
-  color: #00ff9c;
-  font-weight: bold;
-}
-
-.matrixTotals {
-  display: none;
-  margin-top: 12px;
-  padding: 10px;
-  border: 1px solid rgba(0,255,150,0.2);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-}
-
-.matrixTotals.show {
-  display: block;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 8px;
-}
-
-.card {
-  text-align: center;
-  padding: 8px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-}
-
-.card span {
-  display: block;
-}
-
-@media (max-width: 640px) {
-  .controls {
-    flex-direction: column;
-  }
-
-  button, input {
-    width: 100%;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2,1fr);
-  }
-}
-</style>
-</head>
-
-<body>
-
-<canvas id="matrix"></canvas>
-
-<div class="app">
-  <h1>Dots Gematria Checker</h1>
-  <p class="sub">Type a word and tap Generate</p>
-
-  <div class="controls">
-    <input id="word" placeholder="Enter word or phrase">
-    <button onclick="run()">Generate</button>
-  </div>
-
-  <div id="results" class="results"></div>
-
-  <div id="matrixTotals" class="matrixTotals">
-    <div class="grid" id="grid"></div>
-  </div>
-</div>
-
-<script>
-const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-function mapSimple() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = i + 1;
-  return m;
-}
-
-function mapReverse() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = 26 - i;
-  return m;
-}
-
-function mapEnglish() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = (i + 1) * 6;
-  return m;
-}
-
-function mapReduced() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = (i % 9) + 1;
-  return m;
-}
-
-function mapRevReduced() {
-  let m = {};
-  for (let i = 0; i < 26; i++) {
-    let r = 26 - i;
-    m[A[i]] = ((r - 1) % 9) + 1;
-  }
-  return m;
-}
-
-const jewish = [1,2,3,4,5,6,7,8,9,600,10,20,30,40,50,60,70,80,90,100,200,700,900,300,400,500];
-function mapJewish() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = jewish[i];
-  return m;
-}
-
-const chald = {
-  A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,
-  N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7
-};
-
-const sept = [1,2,3,4,5,6,7,6,5,4,3,2,1,1,2,3,4,5,6,7,6,5,4,3,2,1];
-function mapSept() {
-  let m = {};
-  for (let i = 0; i < 26; i++) m[A[i]] = sept[i];
-  return m;
-}
-
-const ciphers = [
-  ["Simpφle", mapSimple()],
-  ["Reverse", mapReverse()],
-  ["English", mapEnglish()],
-  ["Jwsh", mapJewish()],
-  ["Rev Red", mapRevReduced()],
-  ["Pythφ", mapReduced()],
-  ["Chaldean", chald],
-  ["Seφt", mapSept()]
-];
-
-function clean(t) {
-  return t.toUpperCase().replace(/[^A-Z]/g, "");
-}
-
-function run() {
-  let w = clean(document.getElementById("word").value);
-  if (!w) return;
-
-  let rows = "";
-  let grid = "";
-
-  ciphers.forEach(c => {
-    let seq = [...w].map(l => c[1][l] || 0);
-    let total = seq.reduce((a,b) => a + b, 0);
-
-    rows += `<div class="row"><div class="line">
-      <span class="name">${c[0]}</span>
-      ${seq.map(n => `<span class="box">${n}</span>`).join("")}
-      <span class="box total">${total}</span>
-    </div></div>`;
-
-    grid += `<div class="card"><span>${c[0]}</span><span>${total}</span></div>`;
-  });
-
-  document.getElementById("results").innerHTML =
-    `<div class="scrollbox"><div class="inner">${rows}</div></div>`;
-
-  document.getElementById("grid").innerHTML = grid;
-  document.getElementById("results").classList.add("show");
-  document.getElementById("matrixTotals").classList.add("show");
-}
-
-document.getElementById("word").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") run();
-});
-
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-let w, h, cols, drops;
-const font = 16;
-const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-function setupMatrix() {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-  cols = Math.floor(w / font);
-  drops = Array(cols).fill(1);
-}
-
-function drawMatrix() {
-  ctx.fillStyle = "rgba(0,0,0,0.04)";
-  ctx.fillRect(0, 0, w, h);
-
-  ctx.fillStyle = "#00ff9c";
-  ctx.font = font + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const t = chars[Math.floor(Math.random() * chars.length)];
-    ctx.fillText(t, i * font, drops[i] * font);
-
-    if (drops[i] * font > h && Math.random() > 0.975) {
-      drops[i] = 0;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dots Gematria Checker</title>
+  <style>
+    * {
+      box-sizing: border-box;
     }
-    drops[i]++;
-  }
-}
 
-setupMatrix();
-setInterval(drawMatrix, 50);
-window.addEventListener("resize", setupMatrix);
-</script>
+    :root {
+      --bg: #020506;
+      --panel: rgba(0, 0, 0, 0.72);
+      --panel-border: rgba(0, 255, 156, 0.22);
+      --text: #ecfff5;
+      --muted: #9cc7af;
+      --accent: #00ff9c;
+      --cell-bg: rgba(255, 255, 255, 0.05);
+      --name-bg: rgba(0, 255, 156, 0.10);
+      --total-bg: rgba(0, 255, 156, 0.18);
+      --row-sep: rgba(255, 255, 255, 0.06);
+    }
 
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      display: block;
+      background: #000;
+    }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      width: min(1000px, calc(100% - 24px));
+      margin: 20px auto;
+      padding: 18px;
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      background: var(--panel);
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      color: var(--accent);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+    }
+
+    .sub {
+      margin: 8px 0 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #wordInput {
+      flex: 1 1 320px;
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 156, 0.32);
+      background: #000;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    #wordInput::placeholder {
+      color: #92b5a3;
+    }
+
+    #generateBtn {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 156, 0.32);
+      background: rgba(0, 255, 156, 0.12);
+      color: var(--accent);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .error {
+      display: none;
+      margin-top: 10px;
+      color: #ffb3b3;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .results {
+      display: none;
+      margin-top: 14px;
+    }
+
+    .results.show {
+      display: block;
+    }
+
+    /* ONE shared scroll only */
+    .table-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 4px;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 156, 0.28);
+      border-radius: 999px;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    tr {
+      background: transparent;
+    }
+
+    td {
+      min-width: 58px;
+      height: 38px;
+      padding: 0 8px;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 700;
+      border: none;
+      background: var(--cell-bg);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    td.name {
+      min-width: 72px;
+      background: var(--name-bg);
+      color: var(--accent);
+      text-transform: none;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+
+    td.total {
+      background: var(--total-bg);
+      color: var(--accent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .totals-box {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 156, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .totals-box.show {
+      display: block;
+    }
+
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .total-card {
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    .total-card .label {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .total-card .value {
+      display: block;
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        flex-direction: column;
+      }
+
+      #wordInput,
+      #generateBtn {
+        width: 100%;
+      }
+
+      .totals-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      td {
+        min-width: 54px;
+        font-size: 0.92rem;
+      }
+
+      td.name {
+        min-width: 68px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div class="app">
+    <h1>Dots Gematria Checker</h1>
+    <p class="sub">Type a word and tap Generate</p>
+
+    <div class="controls">
+      <input id="wordInput" type="text" placeholder="Enter word or phrase" />
+      <button id="generateBtn">Generate</button>
+    </div>
+
+    <div id="errorBox" class="error">Please enter a word.</div>
+
+    <div id="results" class="results"></div>
+
+    <div id="totalsBox" class="totals-box">
+      <div id="totalsGrid" class="totals-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function mapSimple() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = i + 1;
+      return m;
+    }
+
+    function mapReverse() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = 26 - i;
+      return m;
+    }
+
+    function mapEnglish() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = (i + 1) * 6;
+      return m;
+    }
+
+    function mapReduced() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = (i % 9) + 1;
+      return m;
+    }
+
+    function mapRevReduced() {
+      const m = {};
+      for (let i = 0; i < 26; i++) {
+        const reversePos = 26 - i;
+        m[ALPHABET[i]] = ((reversePos - 1) % 9) + 1;
+      }
+      return m;
+    }
+
+    const jewishValues = [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 600,
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+      200, 700, 900, 300, 400, 500
+    ];
+
+    function mapJewish() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = jewishValues[i];
+      return m;
+    }
+
+    const chaldeanMap = {
+      A: 1, B: 2, C: 3, D: 4, E: 5, F: 8, G: 3, H: 5, I: 1, J: 1,
+      K: 2, L: 3, M: 4, N: 5, O: 7, P: 8, Q: 1, R: 2, S: 3, T: 4,
+      U: 6, V: 6, W: 6, X: 5, Y: 1, Z: 7
+    };
+
+    const septValues = [
+      1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+      1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1
+    ];
+
+    function mapSept() {
+      const m = {};
+      for (let i = 0; i < 26; i++) m[ALPHABET[i]] = septValues[i];
+      return m;
+    }
+
+    const ciphers = [
+      ["simp", mapSimple()],
+      ["rev", mapReverse()],
+      ["eng", mapEnglish()],
+      ["jwsh", mapJewish()],
+      ["r.r.", mapRevReduced()],
+      ["Pyth", mapReduced()],
+      ["chdn", chaldeanMap],
+      ["sept", mapSept()]
+    ];
+
+    const wordInput = document.getElementById("wordInput");
+    const generateBtn = document.getElementById("generateBtn");
+    const results = document.getElementById("results");
+    const totalsBox = document.getElementById("totalsBox");
+    const totalsGrid = document.getElementById("totalsGrid");
+    const errorBox = document.getElementById("errorBox");
+
+    function cleanText(text) {
+      return (text || "").toUpperCase().replace(/[^A-Z]/g, "");
+    }
+
+    function render() {
+      const word = cleanText(wordInput.value);
+
+      if (!word) {
+        errorBox.classList.add("show");
+        results.classList.remove("show");
+        totalsBox.classList.remove("show");
+        results.innerHTML = "";
+        totalsGrid.innerHTML = "";
+        return;
+      }
+
+      errorBox.classList.remove("show");
+
+      let tableRows = "";
+      let totalsHtml = "";
+
+      ciphers.forEach(([name, map]) => {
+        const seq = [...word].map(letter => map[letter] || 0);
+        const total = seq.reduce((sum, n) => sum + n, 0);
+
+        tableRows += `
+          <tr>
+            <td class="name">${name}</td>
+            ${seq.map(n => `<td>${n}</td>`).join("")}
+            <td class="total">${total}</td>
+          </tr>
+        `;
+
+        totalsHtml += `
+          <div class="total-card">
+            <span class="label">${name}</span>
+            <span class="value">${total}</span>
+          </div>
+        `;
+      });
+
+      results.innerHTML = `
+        <div class="table-scroll">
+          <table>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      totalsGrid.innerHTML = totalsHtml;
+      results.classList.add("show");
+      totalsBox.classList.add("show");
+    }
+
+    generateBtn.addEventListener("click", render);
+    wordInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") render();
+    });
+
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    let width, height, columns, drops;
+    const fontSize = 16;
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function setupMatrix() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / fontSize);
+      drops = Array(columns).fill(1);
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#00ff9c";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setupMatrix();
+    setInterval(drawMatrix, 50);
+    window.addEventListener("resize", setupMatrix);
+  </script>
 </body>
 </html>
