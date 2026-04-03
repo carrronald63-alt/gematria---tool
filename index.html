@@ -80,6 +80,16 @@ button {
   display: block;
 }
 
+.scrollbox {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.inner {
+  min-width: max-content;
+}
+
 .row {
   margin-bottom: 6px;
   padding: 6px;
@@ -87,16 +97,12 @@ button {
   background: rgba(255,255,255,0.03);
 }
 
-.strip {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
 .line {
   display: inline-flex;
   gap: 4px;
   align-items: center;
   min-width: max-content;
+  white-space: nowrap;
 }
 
 .name {
@@ -226,7 +232,6 @@ function mapRevReduced() {
   return m;
 }
 
-/* YOUR JWSH */
 const jewish = [1,2,3,4,5,6,7,8,9,600,10,20,30,40,50,60,70,80,90,100,200,700,900,300,400,500];
 function mapJewish() {
   let m = {};
@@ -265,23 +270,25 @@ function run() {
   let w = clean(document.getElementById("word").value);
   if (!w) return;
 
-  let res = "";
+  let rows = "";
   let grid = "";
 
   ciphers.forEach(c => {
     let seq = [...w].map(l => c[1][l] || 0);
     let total = seq.reduce((a,b) => a + b, 0);
 
-    res += `<div class="row"><div class="strip"><div class="line">
+    rows += `<div class="row"><div class="line">
       <span class="name">${c[0]}</span>
       ${seq.map(n => `<span class="box">${n}</span>`).join("")}
       <span class="box total">${total}</span>
-    </div></div></div>`;
+    </div></div>`;
 
     grid += `<div class="card"><span>${c[0]}</span><span>${total}</span></div>`;
   });
 
-  document.getElementById("results").innerHTML = res;
+  document.getElementById("results").innerHTML =
+    `<div class="scrollbox"><div class="inner">${rows}</div></div>`;
+
   document.getElementById("grid").innerHTML = grid;
   document.getElementById("results").classList.add("show");
   document.getElementById("matrixTotals").classList.add("show");
@@ -291,7 +298,6 @@ document.getElementById("word").addEventListener("keydown", function(e) {
   if (e.key === "Enter") run();
 });
 
-/* MATRIX BACKGROUND */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
 
